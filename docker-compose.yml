@@ -1,0 +1,30 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: loyicadb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - loyica_network
+    restart: always
+
+  app:
+    build:
+      context: ./BE
+    container_name: loyicabe
+    ports:
+      - "8080:8081"
+    networks:
+      - loyica_network
+    depends_on:
+      - mongodb
+    restart: always
+
+networks:
+  loyica_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
