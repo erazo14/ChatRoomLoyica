@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html"
 	"log"
 	"net/http"
+	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -19,6 +22,15 @@ type User struct {
 	Name     string `bson:"name"`
 	User     string `bson:"user"`
 	Password string `bson:"password"`
+}
+
+type Chatroom struct {
+	Name  string               `bson:"name"`
+	Users []primitive.ObjectID `bson:"users"` // Store user IDs
+}
+
+type Time struct {
+	CurrenTime string `json:"current_time"`
 }
 
 func main() {
@@ -37,12 +49,23 @@ func main() {
 
 	fmt.Println("Connected to MongoDB!")
 
-	// Define User Type
+	// Define Structs
 	userType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "User",
 		Fields: graphql.Fields{
 			"name": &graphql.Field{Type: graphql.String},
 			"user": &graphql.Field{Type: graphql.String},
+		},
+	})
+
+	chatroomType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Chatroom",
+		Fields: graphql.Fields{
+			"id":   &graphql.Field{Type: graphql.String},
+			"name": &graphql.Field{Type: graphql.String},
+			"users": &graphql.Field{
+				Type: graphql.NewList(graphql.String), // Return list of user IDs
+			},
 		},
 	})
 
@@ -87,6 +110,36 @@ func main() {
 					return map[string]string{"name": name, "user": user}, nil
 				},
 			},
+			"createChatroom": &graphql.Field{
+				Type: chatroomType,
+				Args: graphql.FieldConfigArgument{
+					"name":  &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"users": &graphql.ArgumentConfig{Type: graphql.NewList(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					name := p.Args["name"].(string)
+					users := []primitive.ObjectID{}
+
+					if p.Args["users"] != nil {
+						for _, userID := range p.Args["users"].([]interface{}) {
+							objID, err := primitive.ObjectIDFromHex(userID.(string))
+							if err != nil {
+								return nil, err
+							}
+							users = append(users, objID)
+						}
+					}
+
+					chatroom := Chatroom{Name: name, Users: users}
+					chatroomsCollection := client.Database("ChatRoomDB").Collection("Chatroom")
+					_, err := chatroomsCollection.InsertOne(context.TODO(), chatroom)
+					if err != nil {
+						return nil, err
+					}
+
+					return chatroom, nil
+				},
+			},
 		},
 	})
 
@@ -111,6 +164,13 @@ func main() {
 	// Basic HTTP handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello from %q", html.EscapeString(r.URL.Path))
+	})
+
+	http.HandleFunc("/time", func(w http.ResponseWriter, r *http.Request) {
+		currentTime := []Time{
+			{CurrenTime: time.Now().Format(http.TimeFormat)},
+		}
+		json.NewEncoder(w).Encode(currentTime)
 	})
 
 	fmt.Println("Server is running at http://localhost:8081")
