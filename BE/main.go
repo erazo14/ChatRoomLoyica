@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -36,6 +37,7 @@ type Time struct {
 func main() {
 	// Set client options & connect to MongoDB
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	// clientOptions := options.Client().ApplyURI("mongodb://loyicadb:27017")
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -108,6 +110,31 @@ func main() {
 
 					// Return user (excluding password)
 					return map[string]string{"name": name, "user": user}, nil
+				},
+			},
+			"login": &graphql.Field{
+				Type: userType, // Return user info (except password)
+				Args: graphql.FieldConfigArgument{
+					"user":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"password": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					username := p.Args["user"].(string)
+					password := p.Args["password"].(string)
+
+					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					var foundUser User
+					err := usersCollection.FindOne(context.TODO(), bson.M{"user": username}).Decode(&foundUser)
+
+					if err != nil {
+						return nil, fmt.Errorf("user not found")
+					}
+
+					if foundUser.Password != password {
+						return nil, fmt.Errorf("invalid password")
+					}
+
+					return map[string]string{"name": foundUser.Name, "user": foundUser.User}, nil
 				},
 			},
 			"createChatroom": &graphql.Field{
