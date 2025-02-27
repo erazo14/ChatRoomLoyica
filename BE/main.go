@@ -26,6 +26,7 @@ type User struct {
 }
 
 type Chatroom struct {
+	ID    primitive.ObjectID   `bson:"_id,omitempty"`
 	Name  string               `bson:"name"`
 	Users []primitive.ObjectID `bson:"users"` // Store user IDs
 }
@@ -203,7 +204,6 @@ func main() {
 						return foundChatmroom, fmt.Errorf("Chatroom not found")
 					}
 					objUserID, err := primitive.ObjectIDFromHex(userId)
-
 					usersCollection := client.Database("ChatRoomDB").Collection("User")
 					var foundUser User
 					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
@@ -219,6 +219,38 @@ func main() {
 					}
 
 					return message, nil
+				},
+			},
+			"GetChatrooms": &graphql.Field{
+				Type: graphql.NewList(chatroomType),
+				Args: graphql.FieldConfigArgument{
+					"userId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					userId := p.Args["userId"].(string)
+					objUserID, err := primitive.ObjectIDFromHex(userId)
+					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					var foundUser User
+					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
+					if err != nil {
+						return nil, fmt.Errorf("User not found")
+					}
+
+					var chatrooms []Chatroom
+					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
+					cursor, err := chatroomCollection.Find(context.TODO(), bson.M{"users": objUserID})
+					if err != nil {
+						return nil, err
+					}
+					defer cursor.Close(context.TODO())
+
+					for cursor.Next(context.TODO()) {
+						var chatroom Chatroom
+						cursor.Decode(&chatroom)
+						chatrooms = append(chatrooms, chatroom)
+					}
+
+					return chatrooms, nil
 				},
 			},
 		},
