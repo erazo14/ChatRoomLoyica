@@ -30,6 +30,13 @@ type Chatroom struct {
 	Users []primitive.ObjectID `bson:"users"` // Store user IDs
 }
 
+type Message struct {
+	ChatroomId  primitive.ObjectID `bson:"chatroomid"`
+	UserId      primitive.ObjectID `bson:"userid"`
+	Description string             `bson:"description"`
+	Datetime    string             `bson:"datetime"`
+}
+
 type Time struct {
 	CurrenTime string `json:"current_time"`
 }
@@ -68,6 +75,16 @@ func main() {
 			"users": &graphql.Field{
 				Type: graphql.NewList(graphql.String), // Return list of user IDs
 			},
+		},
+	})
+
+	messageType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Message",
+		Fields: graphql.Fields{
+			"chatroomId":  &graphql.Field{Type: graphql.String},
+			"userId":      &graphql.Field{Type: graphql.String},
+			"description": &graphql.Field{Type: graphql.String},
+			"datetime":    &graphql.Field{Type: graphql.DateTime},
 		},
 	})
 
@@ -165,6 +182,36 @@ func main() {
 					}
 
 					return chatroom, nil
+				},
+			},
+			"createMessage": &graphql.Field{
+				Type: messageType,
+				Args: graphql.FieldConfigArgument{
+					"chatroomId":  &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"userId":      &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"description": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					chatroomId := p.Args["chatroomId"].(string)
+					userId := p.Args["userId"].(string)
+					description := p.Args["description"].(string)
+					objChatroomID, err := primitive.ObjectIDFromHex(chatroomId)
+					if err != nil {
+						return nil, fmt.Errorf("Chatroom not found")
+					}
+					objUserID, err := primitive.ObjectIDFromHex(userId)
+					if err != nil {
+						return nil, fmt.Errorf("User not found")
+					}
+
+					message := Message{ChatroomId: objChatroomID, UserId: objUserID, Description: description, Datetime: time.Now().Format(http.TimeFormat)}
+					messageCollection := client.Database("ChatRoomDB").Collection("Message")
+					_, err = messageCollection.InsertOne(context.TODO(), message)
+					if err != nil {
+						return nil, err
+					}
+
+					return message, nil
 				},
 			},
 		},
