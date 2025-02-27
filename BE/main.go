@@ -145,11 +145,11 @@ func main() {
 					err := usersCollection.FindOne(context.TODO(), bson.M{"user": username}).Decode(&foundUser)
 
 					if err != nil {
-						return nil, fmt.Errorf("user not found")
+						return nil, fmt.Errorf("Invalid user or password")
 					}
 
 					if foundUser.Password != password {
-						return nil, fmt.Errorf("invalid password")
+						return nil, fmt.Errorf("Invalid user or password")
 					}
 
 					return map[string]string{"name": foundUser.Name, "user": foundUser.User}, nil
