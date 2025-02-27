@@ -196,10 +196,17 @@ func main() {
 					userId := p.Args["userId"].(string)
 					description := p.Args["description"].(string)
 					objChatroomID, err := primitive.ObjectIDFromHex(chatroomId)
+					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
+					var foundChatmroom Chatroom
+					err = chatroomCollection.FindOne(context.TODO(), bson.M{"_id": objChatroomID}).Decode(&foundChatmroom)
 					if err != nil {
-						return nil, fmt.Errorf("Chatroom not found")
+						return foundChatmroom, fmt.Errorf("Chatroom not found")
 					}
 					objUserID, err := primitive.ObjectIDFromHex(userId)
+
+					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					var foundUser User
+					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
 					if err != nil {
 						return nil, fmt.Errorf("User not found")
 					}
