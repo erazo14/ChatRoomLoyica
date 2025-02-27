@@ -193,7 +193,7 @@ func main() {
 						return nil, fmt.Errorf("Invalid user or password")
 					}
 
-					return map[string]string{"name": foundUser.Name, "user": foundUser.User}, nil
+					return foundUser, nil
 				},
 			},
 			"createChatroom": &graphql.Field{
