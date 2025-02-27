@@ -22,6 +22,19 @@ services:
       - mongodb
     restart: always
 
+  nextjs:
+    build:
+      context: ./FE
+    container_name: loyicafe
+    ports:
+      - "3000:3000"
+    networks:
+      - loyica_network
+    depends_on:
+      - mongodb
+      - app
+    restart: always
+
 networks:
   loyica_network:
     driver: bridge
