@@ -18,6 +18,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
+
+	"github.com/rs/cors"
 )
 
 // User struct with BSON tags
@@ -311,7 +313,16 @@ func main() {
 		GraphiQL: true, // Enable GraphiQL interface
 	})
 
-	http.Handle("/graphql", h)
+	// Wrap GraphQL handler with CORS middleware
+
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Change to specific origins if needed
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}).Handler(h)
+
+	http.Handle("/graphql", corsHandler)
 	//WebSocket endpoint
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chatroomID := r.URL.Query().Get("chatroomID")
