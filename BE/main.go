@@ -22,9 +22,10 @@ import (
 
 // User struct with BSON tags
 type User struct {
-	Name     string `bson:"name"`
-	User     string `bson:"user"`
-	Password string `bson:"password"`
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	Name     string             `bson:"name"`
+	User     string             `bson:"user"`
+	Password string             `bson:"password"`
 }
 
 type Chatroom struct {
@@ -74,6 +75,7 @@ func main() {
 	userType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "User",
 		Fields: graphql.Fields{
+			"id":   &graphql.Field{Type: graphql.String},
 			"name": &graphql.Field{Type: graphql.String},
 			"user": &graphql.Field{Type: graphql.String},
 		},
@@ -139,6 +141,32 @@ func main() {
 
 					// Return user (excluding password)
 					return map[string]string{"name": name, "user": user}, nil
+				},
+			},
+			"getUsers": &graphql.Field{
+				Type: graphql.NewList(userType), // Return user info (except password)
+				Args: graphql.FieldConfigArgument{
+					"user": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					user := p.Args["user"].(string)
+
+					var users []User
+					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					cursor, err := usersCollection.Find(context.TODO(), bson.M{"user": bson.M{"$ne": user}})
+					if err != nil {
+						return nil, err
+					}
+
+					defer cursor.Close(context.TODO())
+
+					for cursor.Next(context.TODO()) {
+						var user User
+						cursor.Decode(&user)
+						users = append(users, user)
+					}
+
+					return users, nil
 				},
 			},
 			"login": &graphql.Field{
