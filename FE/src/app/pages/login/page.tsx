@@ -12,7 +12,7 @@ const LoginPage = () => {
 
     const onSubmit = async ( user ) => {
         const query = {
-            query: `mutation { login(user: "${user.user}", password: "${user.password}") { name user } }`
+            query: `mutation { login(user: "${user.user}", password: "${user.password}") { id name user } }`
         }
         let results = await fetch('http://localhost:8081/graphql', {
             method: 'POST',
@@ -24,7 +24,12 @@ const LoginPage = () => {
             body: JSON.stringify(query)
           })
           let logged = await results.json();
-          (logged.errors) ? setError("Invalid user or password") : router.push('home');
+          if (logged.errors) {
+            setError("Invalid user or password")
+          } else {
+            sessionStorage.setItem('loggedUser',JSON.stringify(logged['data']['login']))
+            router.push('home');
+          }
     }
 
     const handleSubmit = async (e) => {
