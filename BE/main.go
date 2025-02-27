@@ -7,6 +7,7 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/gorilla/websocket"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 )
@@ -41,6 +43,15 @@ type Message struct {
 type Time struct {
 	CurrenTime string `json:"current_time"`
 }
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+var clients = make(map[*websocket.Conn]bool)
+var mutex = sync.Mutex{}
 
 func main() {
 	// Set client options & connect to MongoDB
@@ -273,6 +284,56 @@ func main() {
 	})
 
 	http.Handle("/graphql", h)
+	//WebSocket endpoint
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		chatroomID := r.URL.Query().Get("chatroomID")
+		if chatroomID == "" {
+			http.Error(w, "Chatroom ID required", http.StatusBadRequest)
+			return
+		}
+
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println("WebSocket upgrade error:", err)
+			return
+		}
+		defer conn.Close()
+
+		mutex.Lock()
+		clients[conn] = true
+		mutex.Unlock()
+
+		//Websocket
+		collection := client.Database("ChatRoomDB").Collection("message")
+		pipeline := mongo.Pipeline{
+			bson.D{{"$match", bson.D{{"fullDocument.chatroom_id", chatroomID}}}},
+		}
+		stream, err := collection.Watch(context.TODO(), pipeline)
+		if err != nil {
+			log.Println("Error watching MongoDB:", err)
+			return
+		}
+		defer stream.Close(context.TODO())
+
+		for stream.Next(context.TODO()) {
+			var message bson.M
+			if err := stream.Decode(&message); err != nil {
+				log.Println("Error decoding message:", err)
+				continue
+			}
+
+			mutex.Lock()
+			for client := range clients {
+				err := client.WriteJSON(message)
+				if err != nil {
+					log.Println("Error sending message:", err)
+					client.Close()
+					delete(clients, client)
+				}
+			}
+			mutex.Unlock()
+		}
+	})
 
 	// Basic HTTP handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
