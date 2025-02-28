@@ -1,13 +1,9 @@
-.wrapperLogin{
+.wrapperLogin {
   width: 270px;
 }
 
-.wrapperLabels { 
+.wrapperLabels {
   display: flex;
   justify-content: space-between;
   margin: 10px
-}
-
-.button {
-
 }

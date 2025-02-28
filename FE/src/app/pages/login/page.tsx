@@ -9,38 +9,39 @@ const LoginPage = () => {
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const apiUrl = process.env.NEXT_PUBLIC_URL_API;
 
-    const onSubmit = async ( user ) => {
+    const onSubmit = async (user) => {
         const query = {
             query: `mutation { login(user: "${user.user}", password: "${user.password}") { id name user } }`
         }
-        let results = await fetch('http://localhost:8081/graphql', {
+        const results = await fetch(apiUrl, {
             method: 'POST',
-        
+
             headers: {
-              "Content-Type": "application/json"
+                "Content-Type": "application/json"
             },
-        
+
             body: JSON.stringify(query)
-          })
-          let logged = await results.json();
-          if (logged.errors) {
+        })
+        const logged = await results.json();
+        if (logged.errors) {
             setError("Invalid user or password")
-          } else {
-            sessionStorage.setItem('loggedUser',JSON.stringify(logged['data']['login']))
+        } else {
+            sessionStorage.setItem('loggedUser', JSON.stringify(logged['data']['login']))
             router.push('home');
-          }
+        }
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!user || !password) {
-          setError('Please fill in both fields');
-          return;
+            setError('Please fill in both fields');
+            return;
         }
         setError('');
         onSubmit({ user, password });
-      };
+    };
 
 
     return (
