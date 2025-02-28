@@ -1,19 +1,19 @@
-"use client"
+"use client";
 import { useRouter } from "next/navigation";
-import styles from "./login.module.css";
-import { useState } from 'react';
+import styles from "./signup.module.css";
+import { useState } from "react";
 
-
-const LoginPage = () => {
+const signUpPage = () => {
     const router = useRouter();
+    const [name, setName] = useState('');
     const [user, setUser] = useState('');
-    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [password, setPassword] = useState('');
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
 
-    const onSubmit = async (user) => {
+    const onSubmit = async () => {
         const query = {
-            query: `mutation { login(user: "${user.user}", password: "${user.password}") { id name user } }`
+            query: `mutation { signup(name: "${name}" ,user: "${user}", password: "${password}") { id name user } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',
@@ -24,33 +24,45 @@ const LoginPage = () => {
 
             body: JSON.stringify(query)
         })
-        const logged = await results.json();
-        if (logged.errors) {
-            setError("Invalid user or password")
+        const userCreated = await results.json();
+        if (userCreated.errors) {
+            setError("Missing field")
         } else {
-            sessionStorage.setItem('loggedUser', JSON.stringify(logged['data']['login']))
-            router.push('home');
+            router.push('login');
         }
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!user || !password) {
-            setError('Please fill in both fields');
+        if (!name || !user || !password) {
+            setError('Please fill fields');
             return;
         }
         setError('');
-        onSubmit({ user, password });
+        onSubmit();
     };
 
-    const handleSignUp = async (e) => {
+    const handleBack = async (e) => {
         e.preventDefault();
-        router.push('signup');
+        router.back();
     };
 
     return (
         <div>
+            <h1>Sign Up</h1>
             <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
+                <div className={styles.wrapperLabels}>
+                    <div>
+                        <label>Name:</label>
+                    </div>
+                    <input
+                        type="name"
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                </div>
                 <div className={styles.wrapperLabels}>
                     <div>
                         <label>User:</label>
@@ -76,13 +88,13 @@ const LoginPage = () => {
                     />
                 </div>
                 {error && <p>{error}</p>}
-                <div>
-                    <button className={styles.button} onClick={handleSignUp}>Sign Up</button>
-                    <button className={styles.button} type="submit">Login</button>
+                <div className={styles.buttonWrapper}>
+                    <button className={styles.button} onClick={handleBack}>back</button>
+                    <button className={styles.button} type="submit">sign Up</button>
                 </div>
             </form>
         </div>
     )
-}
+};
 
-export default LoginPage;
+export default signUpPage;
