@@ -28,7 +28,7 @@ const signUpPage = () => {
         if (userCreated.errors) {
             setError("Missing field")
         } else {
-            router.push('login');
+            router.back();
         }
     }
 
