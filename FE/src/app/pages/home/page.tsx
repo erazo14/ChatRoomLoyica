@@ -1,7 +1,9 @@
 "use client"
+import styles from "./home.module.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useChatroom } from "../../context/chatSelected";
+
 
 const HomePage = () => {
     const router = useRouter();
@@ -44,6 +46,15 @@ const HomePage = () => {
         router.push(`messages`);
     };
 
+    const logOut = () => {
+        sessionStorage.removeItem("loggedUser");
+        router.replace('login');
+    }
+
+    const createRoom = () => {
+        router.push('createChatroom');
+    }
+
     useEffect(() => {
         getChatrooms();
     }, [])
@@ -69,6 +80,10 @@ const HomePage = () => {
             ) : (
                 <p>No chatrooms available.</p>
             )}
+            <div className={styles.buttonWrapper}>
+                <button className={styles.button} onClick={logOut}>Log Out</button>
+                <button className={styles.button} onClick={createRoom}>Create Room</button>
+            </div>
         </div>
     )
 }

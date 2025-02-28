@@ -1,0 +1,9 @@
+.buttonWrapper {
+    display: flex;
+    justify-content: end;
+    margin: 10px;
+}
+
+.button:last-child {
+    margin-left: 5px
+}
