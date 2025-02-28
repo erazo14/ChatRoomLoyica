@@ -19,6 +19,9 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 
+	"crypto/sha256"
+	"encoding/hex"
+
 	"github.com/rs/cors"
 )
 
@@ -51,6 +54,12 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+func hashString(input string) string {
+	hasher := sha256.New()
+	hasher.Write([]byte(input))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 var clients = make(map[*websocket.Conn]bool)
@@ -134,7 +143,7 @@ func main() {
 					password := p.Args["password"].(string)
 
 					// Insert user into MongoDB
-					newUser := User{Name: name, User: user, Password: password}
+					newUser := User{Name: name, User: user, Password: hashString(password)}
 					usersCollection := client.Database("ChatRoomDB").Collection("User")
 					_, err := usersCollection.InsertOne(context.TODO(), newUser)
 					if err != nil {
@@ -189,7 +198,7 @@ func main() {
 						return nil, fmt.Errorf("Invalid user or password")
 					}
 
-					if foundUser.Password != password {
+					if foundUser.Password != hashString(password) {
 						return nil, fmt.Errorf("Invalid user or password")
 					}
 
