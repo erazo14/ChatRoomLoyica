@@ -10,10 +10,11 @@ const HomePage = () => {
     const [error, setError] = useState('');
     const [chatrooms, setChatrooms] = useState([]);
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
-    const { setChatroomId } = useChatroom();
+    const { setChatroomId, setChatroomName } = useChatroom();
 
-    const handleChatroomClick = (chatroomId) => {
-        setChatroomId(chatroomId);
+    const handleChatroomClick = (room) => {
+        setChatroomId(room.id);
+        setChatroomName(room.name);
         router.push(`messages`);
     };
 
@@ -72,7 +73,7 @@ const HomePage = () => {
                     {chatrooms.map(room => (
                         <li
                             key={room.id}
-                            onClick={() => handleChatroomClick(room.id)}
+                            onClick={() => handleChatroomClick(room)}
                             style={{ cursor: "pointer", color: "blue", textDecoration: "underline", marginBottom: "10px" }}
                         >
                             {room.name}
