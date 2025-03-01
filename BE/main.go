@@ -7,7 +7,6 @@ import (
 	"html"
 	"log"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -24,6 +23,8 @@ import (
 	"encoding/hex"
 
 	"github.com/rs/cors"
+
+	"loyicabe/models"
 )
 
 // Define enviorment Varaibles
@@ -31,33 +32,6 @@ var uriDB = "mongodb://localhost:27017" //execute localhost
 // var uriDB = "mongodb://loyicadb:27017"; //executo on docker
 var clientOptions *options.ClientOptions
 var client *mongo.Client
-
-// struct with BSON tags
-type User struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	Name     string             `bson:"name"`
-	User     string             `bson:"user"`
-	Password string             `bson:"password"`
-}
-
-type Chatroom struct {
-	ID    primitive.ObjectID   `bson:"_id,omitempty"`
-	Name  string               `bson:"name"`
-	Users []primitive.ObjectID `bson:"users"` // Store user IDs
-}
-
-type Message struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	ChatroomId  primitive.ObjectID `bson:"chatroomid"`
-	UserId      primitive.ObjectID `bson:"userid"`
-	Description string             `bson:"description"`
-	Datetime    string             `bson:"datetime"`
-	User        User               `bson:"user,omitempty"`
-}
-
-type Time struct {
-	CurrenTime string `json:"current_time"`
-}
 
 // Initialize Monogo Conection
 func initMongo() {
@@ -78,41 +52,7 @@ func initMongo() {
 	fmt.Println("Connected to MongoDB!")
 }
 
-// Define subsription struct
-type SubscriptionManager struct {
-	subscribers map[string][]chan *Message
-	mu          sync.Mutex
-}
-
-// Define subscription manager
-func NewSubscriptionManager() *SubscriptionManager {
-	return &SubscriptionManager{
-		subscribers: make(map[string][]chan *Message),
-	}
-}
-
-// Define Subscribe for socket
-func (m *SubscriptionManager) Subscribe(chatroomID string) <-chan *Message {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	ch := make(chan *Message, 1)
-	m.subscribers[chatroomID] = append(m.subscribers[chatroomID], ch)
-
-	return ch
-}
-
-// Defin when publish message
-func (m *SubscriptionManager) Publish(chatroomID string, msg *Message) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	for _, ch := range m.subscribers[chatroomID] {
-		ch <- msg
-	}
-}
-
-var subManager = NewSubscriptionManager()
+var subManager = models.NewSubscriptionManager()
 
 // define upgrader websocket
 var upgrader = websocket.Upgrader{
@@ -215,7 +155,7 @@ func main() {
 					password := p.Args["password"].(string)
 
 					// Insert user into MongoDB
-					newUser := User{Name: name, User: user, Password: hashString(password)}
+					newUser := models.User{Name: name, User: user, Password: hashString(password)}
 					usersCollection := client.Database("ChatRoomDB").Collection("User")
 					_, err := usersCollection.InsertOne(context.TODO(), newUser)
 					if err != nil {
@@ -234,7 +174,7 @@ func main() {
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					user := p.Args["user"].(string)
 
-					var users []User
+					var users []models.User
 					usersCollection := client.Database("ChatRoomDB").Collection("User")
 					cursor, err := usersCollection.Find(context.TODO(), bson.M{"user": bson.M{"$ne": user}})
 					if err != nil {
@@ -244,7 +184,7 @@ func main() {
 					defer cursor.Close(context.TODO())
 
 					for cursor.Next(context.TODO()) {
-						var user User
+						var user models.User
 						cursor.Decode(&user)
 						users = append(users, user)
 					}
@@ -263,7 +203,7 @@ func main() {
 					password := p.Args["password"].(string)
 
 					usersCollection := client.Database("ChatRoomDB").Collection("User")
-					var foundUser User
+					var foundUser models.User
 					err := usersCollection.FindOne(context.TODO(), bson.M{"user": username}).Decode(&foundUser)
 
 					if err != nil {
@@ -297,7 +237,7 @@ func main() {
 						}
 					}
 
-					chatroom := Chatroom{Name: name, Users: users}
+					chatroom := models.Chatroom{Name: name, Users: users}
 					chatroomsCollection := client.Database("ChatRoomDB").Collection("Chatroom")
 					_, err := chatroomsCollection.InsertOne(context.TODO(), chatroom)
 					if err != nil {
@@ -322,21 +262,21 @@ func main() {
 					objUserID, err := primitive.ObjectIDFromHex(userId)
 
 					// validate if chatroom exist
-					var foundChatmroom Chatroom
+					var foundChatmroom models.Chatroom
 					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
 					err = chatroomCollection.FindOne(context.TODO(), bson.M{"_id": objChatroomID}).Decode(&foundChatmroom)
 					if err != nil {
 						return foundChatmroom, fmt.Errorf("Chatroom not found")
 					}
 					// validate if user exist
-					var foundUser User
+					var foundUser models.User
 					usersCollection := client.Database("ChatRoomDB").Collection("User")
 					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
 					if err != nil {
 						return nil, fmt.Errorf("User not found")
 					}
 
-					message := Message{ChatroomId: objChatroomID, UserId: objUserID, Description: description, Datetime: time.Now().Format(http.TimeFormat)}
+					message := models.Message{ChatroomId: objChatroomID, UserId: objUserID, Description: description, Datetime: time.Now().Format(http.TimeFormat)}
 					messageCollection := client.Database("ChatRoomDB").Collection("Message")
 					_, err = messageCollection.InsertOne(context.TODO(), message)
 					if err != nil {
@@ -356,13 +296,13 @@ func main() {
 					userId := p.Args["userId"].(string)
 					objUserID, err := primitive.ObjectIDFromHex(userId)
 					usersCollection := client.Database("ChatRoomDB").Collection("User")
-					var foundUser User
+					var foundUser models.User
 					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
 					if err != nil {
 						return nil, fmt.Errorf("User not found")
 					}
 
-					var chatrooms []Chatroom
+					var chatrooms []models.Chatroom
 					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
 					cursor, err := chatroomCollection.Find(context.TODO(), bson.M{"users": objUserID})
 					if err != nil {
@@ -371,7 +311,7 @@ func main() {
 					defer cursor.Close(context.TODO())
 
 					for cursor.Next(context.TODO()) {
-						var chatroom Chatroom
+						var chatroom models.Chatroom
 						cursor.Decode(&chatroom)
 						chatrooms = append(chatrooms, chatroom)
 					}
@@ -401,11 +341,11 @@ func main() {
 					defer cursor.Close(context.TODO())
 
 					for cursor.Next(context.TODO()) {
-						var message Message
+						var message models.Message
 						cursor.Decode(&message)
 
 						userCollection := client.Database("ChatRoomDB").Collection("User")
-						var user User
+						var user models.User
 						err := userCollection.FindOne(context.TODO(), bson.M{"_id": message.UserId}).Decode(&user)
 						if err != nil {
 							return nil, fmt.Errorf("User not found for message with ID: %v", message.UserId)
@@ -480,7 +420,7 @@ func main() {
 	})
 
 	http.HandleFunc("/time", func(w http.ResponseWriter, r *http.Request) {
-		currentTime := []Time{
+		currentTime := []models.Time{
 			{CurrenTime: time.Now().Format(http.TimeFormat)},
 		}
 		json.NewEncoder(w).Encode(currentTime)
