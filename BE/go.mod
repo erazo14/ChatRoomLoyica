@@ -1,8 +1,9 @@
-module example.com/mod
+module loyicabe
 
 go 1.23
 
 require (
+	github.com/gorilla/websocket v1.5.3
 	github.com/graphql-go/graphql v0.8.1
 	github.com/graphql-go/handler v0.2.4
 	github.com/rs/cors v1.11.1
@@ -11,7 +12,6 @@ require (
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
