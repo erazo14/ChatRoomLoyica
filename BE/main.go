@@ -41,10 +41,12 @@ type Chatroom struct {
 }
 
 type Message struct {
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
 	ChatroomId  primitive.ObjectID `bson:"chatroomid"`
 	UserId      primitive.ObjectID `bson:"userid"`
 	Description string             `bson:"description"`
 	Datetime    string             `bson:"datetime"`
+	User        User
 }
 
 type Time struct {
@@ -163,10 +165,12 @@ func main() {
 	messageType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Message",
 		Fields: graphql.Fields{
+			"id":          &graphql.Field{Type: graphql.String},
 			"chatroomId":  &graphql.Field{Type: graphql.String},
 			"userId":      &graphql.Field{Type: graphql.String},
 			"description": &graphql.Field{Type: graphql.String},
 			"datetime":    &graphql.Field{Type: graphql.DateTime},
+			"user":        &graphql.Field{Type: userType},
 		},
 	})
 
@@ -363,6 +367,44 @@ func main() {
 					}
 
 					return chatrooms, nil
+				},
+			},
+			"GetMessages": &graphql.Field{
+				Type: graphql.NewList(messageType),
+				Args: graphql.FieldConfigArgument{
+					"chatroomId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					chatroomId := p.Args["chatroomId"].(string)
+
+					objChatroomID, err := primitive.ObjectIDFromHex(chatroomId)
+					if err != nil {
+						return nil, fmt.Errorf("Invalid chatroomId format")
+					}
+
+					var messages []Message
+					messageCollection := client.Database("ChatRoomDB").Collection("Message")
+					cursor, err := messageCollection.Find(context.TODO(), bson.M{"chatroomid": objChatroomID})
+					if err != nil {
+						return nil, err
+					}
+					defer cursor.Close(context.TODO())
+
+					for cursor.Next(context.TODO()) {
+						var message Message
+						cursor.Decode(&message)
+
+						userCollection := client.Database("ChatRoomDB").Collection("User")
+						var user User
+						err := userCollection.FindOne(context.TODO(), bson.M{"_id": message.UserId}).Decode(&user)
+						if err != nil {
+							return nil, fmt.Errorf("User not found for message with ID: %v", message.UserId)
+						}
+						message.User = user
+						messages = append(messages, message)
+					}
+
+					return messages, nil
 				},
 			},
 		},
