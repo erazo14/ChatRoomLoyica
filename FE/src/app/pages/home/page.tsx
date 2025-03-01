@@ -23,6 +23,10 @@ const HomePage = () => {
         router.replace('login');
     }
 
+    const subscribeRoom = () => {
+        router.push('subscribeChatroom');
+    }
+
     const createRoom = () => {
         router.push('createChatroom');
     }
@@ -85,6 +89,7 @@ const HomePage = () => {
             )}
             <div className={styles.buttonWrapper}>
                 <button className={styles.button} onClick={logOut}>Log Out</button>
+                <button className={styles.button} onClick={subscribeRoom}>Subscribe Room</button>
                 <button className={styles.button} onClick={createRoom}>Create Room</button>
             </div>
         </div>

@@ -1,19 +1,19 @@
 .wrapperLogin {
-    width: 270px;
-  }
-  
-  .wrapperLabels {
-    display: flex;
-    justify-content: space-between;
-    margin: 10px
-  }
-  
-  .buttonWrapper {
-    display: flex;
-    justify-content: flex-end;
-    margin: 10px;
-  }
-  
-  .button:last-child {
-    margin-left: 5px
-  }
+  width: 270px;
+}
+
+.wrapperLabels {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px;
+}
+
+.button:last-child {
+  margin-left: 5px
+}
