@@ -303,10 +303,9 @@ func main() {
 					if err != nil {
 						return nil, fmt.Errorf("User not found")
 					}
-
 					var chatrooms []models.Chatroom
 					chatroomCollection := client.Database(DB_Name).Collection("Chatroom")
-					cursor, err := chatroomCollection.Find(context.TODO(), bson.M{"users": objUserID})
+					cursor, err := chatroomCollection.Find(context.TODO(), bson.M{"users": userId})
 					if err != nil {
 						return nil, err
 					}
