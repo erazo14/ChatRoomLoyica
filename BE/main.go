@@ -10,12 +10,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/gorilla/websocket"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 
@@ -25,7 +26,7 @@ import (
 	"github.com/rs/cors"
 )
 
-// User struct with BSON tags
+// struct with BSON tags
 type User struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
 	Name     string             `bson:"name"`
@@ -50,10 +51,69 @@ type Time struct {
 	CurrenTime string `json:"current_time"`
 }
 
+// Define subsription struct
+type SubscriptionManager struct {
+	subscribers map[string][]chan *Message
+	mu          sync.Mutex
+}
+
+// Define subscription manager
+func NewSubscriptionManager() *SubscriptionManager {
+	return &SubscriptionManager{
+		subscribers: make(map[string][]chan *Message),
+	}
+}
+
+// Define Subscribe for socket
+func (m *SubscriptionManager) Subscribe(chatroomID string) <-chan *Message {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	ch := make(chan *Message, 1)
+	m.subscribers[chatroomID] = append(m.subscribers[chatroomID], ch)
+
+	return ch
+}
+
+// Defin when publish message
+func (m *SubscriptionManager) Publish(chatroomID string, msg *Message) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, ch := range m.subscribers[chatroomID] {
+		ch <- msg
+	}
+}
+
+var subManager = NewSubscriptionManager()
+
+// define upgrader websocket
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("Failed to upgrade:", err)
+		return
+	}
+	defer conn.Close()
+
+	chatroomID := r.URL.Query().Get("chatroomID")
+	if chatroomID == "" {
+		log.Println("Missing chatroomID")
+		return
+	}
+
+	messageChannel := subManager.Subscribe(chatroomID)
+
+	for msg := range messageChannel {
+		if err := conn.WriteJSON(msg); err != nil {
+			log.Println("WebSocket write error:", err)
+			break
+		}
+	}
 }
 
 func hashString(input string) string {
@@ -61,9 +121,6 @@ func hashString(input string) string {
 	hasher.Write([]byte(input))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
-
-var clients = make(map[*websocket.Conn]bool)
-var mutex = sync.Mutex{}
 
 func main() {
 	// Set client options & connect to MongoDB
@@ -247,15 +304,18 @@ func main() {
 					userId := p.Args["userId"].(string)
 					description := p.Args["description"].(string)
 					objChatroomID, err := primitive.ObjectIDFromHex(chatroomId)
-					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
+					objUserID, err := primitive.ObjectIDFromHex(userId)
+
+					// validate if chatroom exist
 					var foundChatmroom Chatroom
+					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
 					err = chatroomCollection.FindOne(context.TODO(), bson.M{"_id": objChatroomID}).Decode(&foundChatmroom)
 					if err != nil {
 						return foundChatmroom, fmt.Errorf("Chatroom not found")
 					}
-					objUserID, err := primitive.ObjectIDFromHex(userId)
-					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					// validate if user exist
 					var foundUser User
+					usersCollection := client.Database("ChatRoomDB").Collection("User")
 					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
 					if err != nil {
 						return nil, fmt.Errorf("User not found")
@@ -267,6 +327,8 @@ func main() {
 					if err != nil {
 						return nil, err
 					}
+
+					subManager.Publish(chatroomId, &message)
 
 					return message, nil
 				},
@@ -306,10 +368,27 @@ func main() {
 		},
 	})
 
+	//Define Subscription
+	subscriptionType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Subscription",
+		Fields: graphql.Fields{
+			"messageAdded": &graphql.Field{
+				Type: messageType,
+				Args: graphql.FieldConfigArgument{
+					"chatroomId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					return nil, nil // This will be handled separately
+				},
+			},
+		},
+	})
+
 	// Define Schema
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query:    queryType,
-		Mutation: mutation,
+		Query:        queryType,
+		Mutation:     mutation,
+		Subscription: subscriptionType,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create schema: %v", err)
@@ -333,55 +412,7 @@ func main() {
 
 	http.Handle("/graphql", corsHandler)
 	//WebSocket endpoint
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		chatroomID := r.URL.Query().Get("chatroomID")
-		if chatroomID == "" {
-			http.Error(w, "Chatroom ID required", http.StatusBadRequest)
-			return
-		}
-
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Println("WebSocket upgrade error:", err)
-			return
-		}
-		defer conn.Close()
-
-		mutex.Lock()
-		clients[conn] = true
-		mutex.Unlock()
-
-		//Websocket
-		collection := client.Database("ChatRoomDB").Collection("message")
-		pipeline := mongo.Pipeline{
-			bson.D{{"$match", bson.D{{"fullDocument.chatroom_id", chatroomID}}}},
-		}
-		stream, err := collection.Watch(context.TODO(), pipeline)
-		if err != nil {
-			log.Println("Error watching MongoDB:", err)
-			return
-		}
-		defer stream.Close(context.TODO())
-
-		for stream.Next(context.TODO()) {
-			var message bson.M
-			if err := stream.Decode(&message); err != nil {
-				log.Println("Error decoding message:", err)
-				continue
-			}
-
-			mutex.Lock()
-			for client := range clients {
-				err := client.WriteJSON(message)
-				if err != nil {
-					log.Println("Error sending message:", err)
-					client.Close()
-					delete(clients, client)
-				}
-			}
-			mutex.Unlock()
-		}
-	})
+	http.HandleFunc("/ws", handleWebSocket)
 
 	// Basic HTTP handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
