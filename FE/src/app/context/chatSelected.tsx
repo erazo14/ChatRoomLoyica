@@ -10,7 +10,7 @@ export const ChatroomProvider = ({ children }) => {
 
     const setChatroomId = (chatroomId) => {
         setId(chatroomId);
-        setWs(new WebSocket(`ws://localhost:8081/ws?chatroomID=${chatroomId.match(/ObjectID\("(.+)"\)/)?.[1]}`));
+        setWs(new WebSocket(`ws://localhost:8081/ws?chatroomID=${chatroomId}`));
     };
 
     const setChatroomName = (roomName) => {

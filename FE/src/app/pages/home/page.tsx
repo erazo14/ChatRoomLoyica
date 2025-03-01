@@ -34,7 +34,7 @@ const HomePage = () => {
                 router.push('/login');
                 return;
             }
-            const userId = userData?.id?.match(/ObjectID\("(.+)"\)/)?.[1] || userData?.id;
+            const userId = userData?.id;
             const query = {
                 query: `mutation { GetChatrooms(userId: "${userId}") { id name users } }`
             }

@@ -28,10 +28,10 @@ const MessagePage = () => {
             router.push('/login');
             return;
         }
-        const userId = userData?.id?.match(/ObjectID\("(.+)"\)/)?.[1] || userData?.id;
+        const userId = userData?.id;
 
         const query = {
-            query: `mutation { createMessage(chatroomId: "${id.match(/ObjectID\("(.+)"\)/)?.[1]}", userId: "${userId}", description: "${sendMessage}") { ID UserId User{Name} Description } }`
+            query: `mutation { createMessage(chatroomId: "${id}", userId: "${userId}", description: "${sendMessage}") { ID UserId User{Name} Description } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',
@@ -59,7 +59,7 @@ const MessagePage = () => {
     useEffect(() => {
         const getMessages = async () => {
             const query = {
-                query: `mutation { GetMessages(chatroomId: "${id.match(/ObjectID\("(.+)"\)/)?.[1]}") { ID UserId User{Name} Description } }`
+                query: `mutation { GetMessages(chatroomId: "${id}") { ID UserId User{Name} Description } }`
             }
             const results = await fetch(apiUrl, {
                 method: 'POST',
