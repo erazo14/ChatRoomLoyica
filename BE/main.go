@@ -29,7 +29,9 @@ import (
 
 // Define enviorment Varaibles
 var uriDB = "mongodb://localhost:27017" //execute localhost
-// var uriDB = "mongodb://loyicadb:27017"; //executo on docker
+// var uriDB = "mongodb://loyicadb:27017" //executo on docker
+
+var DB_Name = "ChatRoomDB"
 var clientOptions *options.ClientOptions
 var client *mongo.Client
 
@@ -156,7 +158,7 @@ func main() {
 
 					// Insert user into MongoDB
 					newUser := models.User{Name: name, User: user, Password: hashString(password)}
-					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					usersCollection := client.Database(DB_Name).Collection("User")
 					_, err := usersCollection.InsertOne(context.TODO(), newUser)
 					if err != nil {
 						return nil, err
@@ -175,7 +177,7 @@ func main() {
 					user := p.Args["user"].(string)
 
 					var users []models.User
-					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					usersCollection := client.Database(DB_Name).Collection("User")
 					cursor, err := usersCollection.Find(context.TODO(), bson.M{"user": bson.M{"$ne": user}})
 					if err != nil {
 						return nil, err
@@ -202,7 +204,7 @@ func main() {
 					username := p.Args["user"].(string)
 					password := p.Args["password"].(string)
 
-					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					usersCollection := client.Database(DB_Name).Collection("User")
 					var foundUser models.User
 					err := usersCollection.FindOne(context.TODO(), bson.M{"user": username}).Decode(&foundUser)
 
@@ -238,7 +240,7 @@ func main() {
 					}
 
 					chatroom := models.Chatroom{Name: name, Users: users}
-					chatroomsCollection := client.Database("ChatRoomDB").Collection("Chatroom")
+					chatroomsCollection := client.Database(DB_Name).Collection("Chatroom")
 					_, err := chatroomsCollection.InsertOne(context.TODO(), chatroom)
 					if err != nil {
 						return nil, err
@@ -263,21 +265,21 @@ func main() {
 
 					// validate if chatroom exist
 					var foundChatmroom models.Chatroom
-					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
+					chatroomCollection := client.Database(DB_Name).Collection("Chatroom")
 					err = chatroomCollection.FindOne(context.TODO(), bson.M{"_id": objChatroomID}).Decode(&foundChatmroom)
 					if err != nil {
 						return foundChatmroom, fmt.Errorf("Chatroom not found")
 					}
 					// validate if user exist
 					var foundUser models.User
-					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					usersCollection := client.Database(DB_Name).Collection("User")
 					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
 					if err != nil {
 						return nil, fmt.Errorf("User not found")
 					}
 
 					message := models.Message{ChatroomId: objChatroomID, UserId: objUserID, Description: description, Datetime: time.Now().Format(http.TimeFormat)}
-					messageCollection := client.Database("ChatRoomDB").Collection("Message")
+					messageCollection := client.Database(DB_Name).Collection("Message")
 					_, err = messageCollection.InsertOne(context.TODO(), message)
 					if err != nil {
 						return nil, err
@@ -295,7 +297,7 @@ func main() {
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					userId := p.Args["userId"].(string)
 					objUserID, err := primitive.ObjectIDFromHex(userId)
-					usersCollection := client.Database("ChatRoomDB").Collection("User")
+					usersCollection := client.Database(DB_Name).Collection("User")
 					var foundUser models.User
 					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
 					if err != nil {
@@ -303,7 +305,7 @@ func main() {
 					}
 
 					var chatrooms []models.Chatroom
-					chatroomCollection := client.Database("ChatRoomDB").Collection("Chatroom")
+					chatroomCollection := client.Database(DB_Name).Collection("Chatroom")
 					cursor, err := chatroomCollection.Find(context.TODO(), bson.M{"users": objUserID})
 					if err != nil {
 						return nil, err
@@ -333,7 +335,7 @@ func main() {
 					}
 
 					var messages []map[string]interface{}
-					messageCollection := client.Database("ChatRoomDB").Collection("Message")
+					messageCollection := client.Database(DB_Name).Collection("Message")
 					cursor, err := messageCollection.Find(context.TODO(), bson.M{"chatroomid": objChatroomID})
 					if err != nil {
 						return nil, err
@@ -344,7 +346,7 @@ func main() {
 						var message models.Message
 						cursor.Decode(&message)
 
-						userCollection := client.Database("ChatRoomDB").Collection("User")
+						userCollection := client.Database(DB_Name).Collection("User")
 						var user models.User
 						err := userCollection.FindOne(context.TODO(), bson.M{"_id": message.UserId}).Decode(&user)
 						if err != nil {
@@ -354,7 +356,7 @@ func main() {
 						newMessage := map[string]interface{}{
 							"ID":          message.ID.Hex(),
 							"Description": message.Description,
-							"UserId":      user.ID.Hex(),
+							"UserId":      user.ID,
 							"User": map[string]string{
 								"Name": user.Name,
 							},

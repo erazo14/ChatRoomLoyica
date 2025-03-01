@@ -8,10 +8,10 @@ import (
 
 // struct with BSON tags
 type User struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	Name     string             `bson:"name"`
-	User     string             `bson:"user"`
-	Password string             `bson:"password"`
+	ID       string `bson:"_id,omitempty"`
+	Name     string `bson:"name"`
+	User     string `bson:"user"`
+	Password string `bson:"password"`
 }
 
 type Chatroom struct {
