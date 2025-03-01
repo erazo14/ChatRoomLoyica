@@ -46,7 +46,7 @@ type Message struct {
 	UserId      primitive.ObjectID `bson:"userid"`
 	Description string             `bson:"description"`
 	Datetime    string             `bson:"datetime"`
-	User        User
+	User        User               `bson:"user,omitempty"`
 }
 
 type Time struct {
@@ -146,7 +146,7 @@ func main() {
 		Name: "User",
 		Fields: graphql.Fields{
 			"id":   &graphql.Field{Type: graphql.String},
-			"name": &graphql.Field{Type: graphql.String},
+			"Name": &graphql.Field{Type: graphql.String},
 			"user": &graphql.Field{Type: graphql.String},
 		},
 	})
@@ -165,12 +165,12 @@ func main() {
 	messageType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Message",
 		Fields: graphql.Fields{
-			"id":          &graphql.Field{Type: graphql.String},
-			"chatroomId":  &graphql.Field{Type: graphql.String},
-			"userId":      &graphql.Field{Type: graphql.String},
-			"description": &graphql.Field{Type: graphql.String},
-			"datetime":    &graphql.Field{Type: graphql.DateTime},
-			"user":        &graphql.Field{Type: userType},
+			"ID":          &graphql.Field{Type: graphql.String},
+			"ChatroomId":  &graphql.Field{Type: graphql.String},
+			"UserId":      &graphql.Field{Type: graphql.String},
+			"Description": &graphql.Field{Type: graphql.String},
+			"DateTime":    &graphql.Field{Type: graphql.DateTime},
+			"User":        &graphql.Field{Type: userType},
 		},
 	})
 
@@ -331,9 +331,8 @@ func main() {
 					if err != nil {
 						return nil, err
 					}
-
+					message.User = foundUser
 					subManager.Publish(chatroomId, &message)
-
 					return message, nil
 				},
 			},
@@ -382,7 +381,7 @@ func main() {
 						return nil, fmt.Errorf("Invalid chatroomId format")
 					}
 
-					var messages []Message
+					var messages []map[string]interface{}
 					messageCollection := client.Database("ChatRoomDB").Collection("Message")
 					cursor, err := messageCollection.Find(context.TODO(), bson.M{"chatroomid": objChatroomID})
 					if err != nil {
@@ -401,7 +400,15 @@ func main() {
 							return nil, fmt.Errorf("User not found for message with ID: %v", message.UserId)
 						}
 						message.User = user
-						messages = append(messages, message)
+						newMessage := map[string]interface{}{
+							"ID":          message.ID.Hex(),
+							"Description": message.Description,
+							"UserId":      user.ID.Hex(),
+							"User": map[string]string{
+								"Name": user.Name,
+							},
+						}
+						messages = append(messages, newMessage)
 					}
 
 					return messages, nil
