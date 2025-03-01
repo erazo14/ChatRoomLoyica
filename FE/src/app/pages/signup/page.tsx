@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import styles from "./signup.module.css";
 import { useState } from "react";
 
-const signUpPage = () => {
+const SignUpPage = () => {
     const router = useRouter();
     const [name, setName] = useState('');
     const [user, setUser] = useState('');
@@ -97,4 +97,4 @@ const signUpPage = () => {
     )
 };
 
-export default signUpPage;
+export default SignUpPage;

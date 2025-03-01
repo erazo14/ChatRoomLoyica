@@ -51,34 +51,36 @@ const CreateChatroomPage = () => {
 
     const handleSelectChange = (e) => {
         userGetted.map((user) => {
-            user.id == e.target.value ? setName(user.name) : '';
+            if (user.id == e.target.value) {
+                setName(user.name);
+            }
         })
         setUserSelected([`"${e.target.value.match(/ObjectID\("(.+)"\)/)?.[1]}"`])
     }
 
-    const getUsers = async () => {
-        const userName = sessionStorage.getItem("loggedUser") ? JSON.parse(sessionStorage.getItem("loggedUser")) : router.replace('home');
-        const query = {
-            query: `mutation { getUsers(user: "${userName?.user}") { id name user } }`
-        };
-        const results = await fetch(apiUrl, {
-            method: 'POST',
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify(query)
-        })
-        const usersGetted = await results.json();
-        if (usersGetted.errors) {
-            setError("Error getting users")
-        } else {
-            setUserGetted(usersGetted?.data?.getUsers)
-        };
-    };
-
     useEffect(() => {
+        const getUsers = async () => {
+            const userName = sessionStorage.getItem("loggedUser") ? JSON.parse(sessionStorage.getItem("loggedUser")) : router.replace('home');
+            const query = {
+                query: `mutation { getUsers(user: "${userName?.user}") { id name user } }`
+            };
+            const results = await fetch(apiUrl, {
+                method: 'POST',
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(query)
+            })
+            const usersGetted = await results.json();
+            if (usersGetted.errors) {
+                setError("Error getting users")
+            } else {
+                setUserGetted(usersGetted?.data?.getUsers)
+            };
+        };
+
         getUsers();
     }, []);
 

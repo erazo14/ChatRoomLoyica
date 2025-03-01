@@ -12,35 +12,6 @@ const HomePage = () => {
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
     const { setChatroomId } = useChatroom();
 
-    const getChatrooms = async () => {
-        const userData = JSON.parse(sessionStorage.getItem('loggedUser'));
-        if (!userData) {
-            router.push('/login');
-            return;
-        }
-        const userId = userData?.id?.match(/ObjectID\("(.+)"\)/)?.[1] || userData?.id;
-        const query = {
-            query: `mutation { GetChatrooms(userId: "${userId}") { id name users } }`
-        }
-        try {
-            const results = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(query)
-            });
-
-            const response = await results.json();
-
-            if (response.errors) {
-                setError("Error getting chat rooms");
-            } else {
-                setChatrooms(response.data.GetChatrooms || []);
-            }
-        } catch (err) {
-            setError("Failed to fetch chat rooms");
-        }
-    }
-
     const handleChatroomClick = (chatroomId) => {
         setChatroomId(chatroomId);
         router.push(`messages`);
@@ -56,6 +27,37 @@ const HomePage = () => {
     }
 
     useEffect(() => {
+        const getChatrooms = async () => {
+            const userData = JSON.parse(sessionStorage.getItem('loggedUser'));
+            if (!userData) {
+                router.push('/login');
+                return;
+            }
+            const userId = userData?.id?.match(/ObjectID\("(.+)"\)/)?.[1] || userData?.id;
+            const query = {
+                query: `mutation { GetChatrooms(userId: "${userId}") { id name users } }`
+            }
+            try {
+                const results = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(query)
+                });
+
+                const response = await results.json();
+
+                if (response.errors) {
+                    setError("Error getting chat rooms");
+                } else {
+                    setChatrooms(response.data.GetChatrooms || []);
+                }
+            } catch (err) {
+                if (err) {
+                    setError(`Failed to get chat rooms`);
+                }
+            }
+        }
+
         getChatrooms();
     }, [])
 
