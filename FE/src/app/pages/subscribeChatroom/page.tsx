@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const SubscribeChatroomPage = () => {
     const router = useRouter();
     const [error, setError] = useState<string>('');
-    const [chatrooms, setChatrooms] = useState<any[]>([]);
+    const [chatrooms, setChatrooms] = useState([]);
     const [userlogged, setUserLogged] = useState(undefined);
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
 

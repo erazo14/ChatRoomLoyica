@@ -1,20 +1,18 @@
 "use client";
 import { useRouter } from "next/navigation";
 import styles from "./createChatroom.module.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const CreateChatroomPage = () => {
     const router = useRouter();
     const [name, setName] = useState('');
-    const [userSelected, setUserSelected] = useState([]);
     const [error, setError] = useState('');
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
 
     const onSubmit = async () => {
-        const userName = JSON.parse(sessionStorage.getItem("loggedUser"));
-        userSelected.push(`"${userName.id}"`);
+        const user = JSON.parse(sessionStorage.getItem("loggedUser"));
         const query = {
-            query: `mutation { createChatroom(name: "${name}" ,users: [${userSelected}]) { name users } }`
+            query: `mutation { createChatroom(name: "${name}" ,users: [${user.id}]) { name users } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',
