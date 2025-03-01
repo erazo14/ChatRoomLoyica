@@ -351,6 +351,49 @@ func main() {
 					return chatrooms, nil
 				},
 			},
+			"subscribeChatrooms": &graphql.Field{
+				Type: chatroomType,
+				Args: graphql.FieldConfigArgument{
+					"chatroomId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"userId":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					chatroomId, _ := p.Args["chatroomId"].(string)
+					userId, _ := p.Args["userId"].(string)
+					objChatroomID, err := primitive.ObjectIDFromHex(chatroomId)
+					if err != nil {
+						return nil, fmt.Errorf("Invalid chatroom ID format: %v", err)
+					}
+					objUserID, err := primitive.ObjectIDFromHex(userId)
+					if err != nil {
+						return nil, fmt.Errorf("Invalid user ID format: %v", err)
+					}
+					usersCollection := client.Database(DB_Name).Collection("User")
+					var foundUser models.User
+					err = usersCollection.FindOne(context.TODO(), bson.M{"_id": objUserID}).Decode(&foundUser)
+					if err != nil {
+						return nil, fmt.Errorf("User not found")
+					}
+					chatroomCollection := client.Database(DB_Name).Collection("Chatroom")
+					var chatroom models.Chatroom
+					err = chatroomCollection.FindOne(context.TODO(), bson.M{"_id": objChatroomID}).Decode(&chatroom)
+					if err != nil {
+						return nil, fmt.Errorf("Chatroom not found")
+					}
+
+					update := bson.M{"$addToSet": bson.M{"users": foundUser.ID}}
+					_, err = chatroomCollection.UpdateByID(context.TODO(), objChatroomID, update)
+					if err != nil {
+						return nil, fmt.Errorf("Chatroom error updating", err)
+					}
+
+					err = chatroomCollection.FindOne(context.TODO(), bson.M{"_id": objChatroomID}).Decode(&chatroom)
+					if err != nil {
+						return nil, fmt.Errorf("Failed to fetch updated chatroom")
+					}
+					return chatroom, nil
+				},
+			},
 			"GetMessages": &graphql.Field{
 				Type: graphql.NewList(messageType),
 				Args: graphql.FieldConfigArgument{
