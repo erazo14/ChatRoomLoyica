@@ -52,7 +52,7 @@ const CreateChatroomPage = () => {
     const handleSelectChange = (e) => {
         userGetted.map((user) => {
             if (user.id == e.target.value) {
-                setName(user.name);
+                setName(user.Name);
             }
         })
         setUserSelected([`"${e.target.value.match(/ObjectID\("(.+)"\)/)?.[1]}"`])
@@ -62,7 +62,7 @@ const CreateChatroomPage = () => {
         const getUsers = async () => {
             const userName = sessionStorage.getItem("loggedUser") ? JSON.parse(sessionStorage.getItem("loggedUser")) : router.replace('home');
             const query = {
-                query: `mutation { getUsers(user: "${userName?.user}") { id name user } }`
+                query: `mutation { getUsers(user: "${userName?.user}") { id Name user } }`
             };
             const results = await fetch(apiUrl, {
                 method: 'POST',
@@ -102,7 +102,7 @@ const CreateChatroomPage = () => {
                         onChange={(e) => handleSelectChange(e)}
                     >
                         {userGetted.length && userGetted.map((user) =>
-                            <option key={user.id} value={user.id}>{user.name}</option>
+                            <option key={user.id} value={user.id}>{user.Name}</option>
                         )}
                     </select>
                 </div>

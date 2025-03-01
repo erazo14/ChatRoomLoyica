@@ -13,7 +13,7 @@ const LoginPage = () => {
 
     const onSubmit = async (user) => {
         const query = {
-            query: `mutation { login(user: "${user.user}", password: "${user.password}") { id name user } }`
+            query: `mutation { login(user: "${user.user}", password: "${user.password}") { id Name user } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',

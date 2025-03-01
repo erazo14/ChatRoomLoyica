@@ -13,7 +13,7 @@ const SignUpPage = () => {
 
     const onSubmit = async () => {
         const query = {
-            query: `mutation { signup(name: "${name}" ,user: "${user}", password: "${password}") { id name user } }`
+            query: `mutation { signup(name: "${name}" ,user: "${user}", password: "${password}") { id Name user } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',
