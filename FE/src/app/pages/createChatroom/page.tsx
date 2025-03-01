@@ -13,7 +13,7 @@ const CreateChatroomPage = () => {
 
     const onSubmit = async () => {
         const userName = JSON.parse(sessionStorage.getItem("loggedUser"));
-        userSelected.push(`"${userName.id.match(/ObjectID\("(.+)"\)/)?.[1]}"`);
+        userSelected.push(`"${userName.id}"`);
         const query = {
             query: `mutation { createChatroom(name: "${name}" ,users: [${userSelected}]) { name users } }`
         }
@@ -55,7 +55,7 @@ const CreateChatroomPage = () => {
                 setName(user.Name);
             }
         })
-        setUserSelected([`"${e.target.value.match(/ObjectID\("(.+)"\)/)?.[1]}"`])
+        setUserSelected([`"${e.target.value}"`])
     }
 
     useEffect(() => {

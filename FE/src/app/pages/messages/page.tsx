@@ -79,8 +79,6 @@ const MessagePage = () => {
         getMessages();
     }, []);
 
-    console.log(messages);
-
     useEffect(() => {
         if (ws) {
             ws.onmessage = (event) => {
