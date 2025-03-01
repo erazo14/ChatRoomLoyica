@@ -26,6 +26,12 @@ import (
 	"github.com/rs/cors"
 )
 
+// Define enviorment Varaibles
+var uriDB = "mongodb://localhost:27017" //execute localhost
+// var uriDB = "mongodb://loyicadb:27017"; //executo on docker
+var clientOptions *options.ClientOptions
+var client *mongo.Client
+
 // struct with BSON tags
 type User struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
@@ -51,6 +57,25 @@ type Message struct {
 
 type Time struct {
 	CurrenTime string `json:"current_time"`
+}
+
+// Initialize Monogo Conection
+func initMongo() {
+	// Set client options & connect to MongoDB
+	clientOptions = options.Client().ApplyURI(uriDB)
+	var err error
+	client, err = mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the MongoDB connection
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to MongoDB!")
 }
 
 // Define subsription struct
@@ -125,21 +150,7 @@ func hashString(input string) string {
 }
 
 func main() {
-	// Set client options & connect to MongoDB
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	// clientOptions := options.Client().ApplyURI("mongodb://loyicadb:27017")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Check the MongoDB connection
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Connected to MongoDB!")
+	initMongo()
 
 	// Define Structs
 	userType := graphql.NewObject(graphql.ObjectConfig{
