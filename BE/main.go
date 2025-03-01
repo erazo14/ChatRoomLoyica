@@ -289,6 +289,32 @@ func main() {
 					return message, nil
 				},
 			},
+			"allChatrooms": &graphql.Field{
+				Type: graphql.NewList(chatroomType),
+				Args: graphql.FieldConfigArgument{},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					var chatrooms []models.Chatroom
+					chatroomCollection := client.Database(DB_Name).Collection("Chatroom")
+					cursor, err := chatroomCollection.Find(context.TODO(), bson.M{})
+					if err != nil {
+						return nil, err
+					}
+					defer cursor.Close(context.TODO())
+
+					for cursor.Next(context.TODO()) {
+						var chatroom models.Chatroom
+						cursor.Decode(&chatroom)
+						objChatroomID, err := primitive.ObjectIDFromHex(chatroom.ID)
+						if err != nil {
+							return nil, err
+						}
+						chatroom.ID = objChatroomID.Hex()
+						chatrooms = append(chatrooms, chatroom)
+					}
+
+					return chatrooms, nil
+				},
+			},
 			"GetChatrooms": &graphql.Field{
 				Type: graphql.NewList(chatroomType),
 				Args: graphql.FieldConfigArgument{
