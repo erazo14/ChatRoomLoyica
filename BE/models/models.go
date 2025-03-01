@@ -15,9 +15,9 @@ type User struct {
 }
 
 type Chatroom struct {
-	ID    string               `bson:"_id,omitempty"`
-	Name  string               `bson:"name"`
-	Users []primitive.ObjectID `bson:"users"` // Store user IDs
+	ID    string   `bson:"_id,omitempty"`
+	Name  string   `bson:"name"`
+	Users []string `bson:"users"` // Store user IDs
 }
 
 type Message struct {

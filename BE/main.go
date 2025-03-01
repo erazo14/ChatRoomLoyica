@@ -227,7 +227,7 @@ func main() {
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					name := p.Args["name"].(string)
-					users := []primitive.ObjectID{}
+					users := []string{}
 
 					if p.Args["users"] != nil {
 						for _, userID := range p.Args["users"].([]interface{}) {
@@ -235,7 +235,7 @@ func main() {
 							if err != nil {
 								return nil, err
 							}
-							users = append(users, objID)
+							users = append(users, objID.Hex())
 						}
 					}
 
