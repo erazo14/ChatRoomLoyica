@@ -315,6 +315,11 @@ func main() {
 					for cursor.Next(context.TODO()) {
 						var chatroom models.Chatroom
 						cursor.Decode(&chatroom)
+						objChatroomID, err := primitive.ObjectIDFromHex(chatroom.ID)
+						if err != nil {
+							return nil, err
+						}
+						chatroom.ID = objChatroomID.Hex()
 						chatrooms = append(chatrooms, chatroom)
 					}
 

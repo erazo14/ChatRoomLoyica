@@ -15,7 +15,7 @@ type User struct {
 }
 
 type Chatroom struct {
-	ID    primitive.ObjectID   `bson:"_id,omitempty"`
+	ID    string               `bson:"_id,omitempty"`
 	Name  string               `bson:"name"`
 	Users []primitive.ObjectID `bson:"users"` // Store user IDs
 }
