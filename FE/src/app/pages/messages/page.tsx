@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 const MessagePage = () => {
     const router = useRouter();
-    const { id, name } = useChatroom();
+    const { id, name, ws } = useChatroom();
     const [error, setError] = useState('');
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
     const [messages, setMessages] = useState([]);
@@ -31,7 +31,7 @@ const MessagePage = () => {
         const userId = userData?.id?.match(/ObjectID\("(.+)"\)/)?.[1] || userData?.id;
 
         const query = {
-            query: `mutation { createMessage(chatroomId: "${id.match(/ObjectID\("(.+)"\)/)?.[1]}", userId: "${userId}", description: "${sendMessage}") { id userId user{name} description } }`
+            query: `mutation { createMessage(chatroomId: "${id.match(/ObjectID\("(.+)"\)/)?.[1]}", userId: "${userId}", description: "${sendMessage}") { ID UserId User{Name} Description } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',
@@ -46,6 +46,7 @@ const MessagePage = () => {
         if (response.errors) {
             setError("Message doesn't send it")
         } else {
+            console.log(response);
             // setMessages((prevMessages) => [...prevMessages, response.data.createMessage]);
         }
     }
@@ -56,13 +57,9 @@ const MessagePage = () => {
     };
 
     useEffect(() => {
-        if (!id) {
-            router.replace('login');
-            return;
-        }
         const getMessages = async () => {
             const query = {
-                query: `mutation { GetMessages(chatroomId: "${id.match(/ObjectID\("(.+)"\)/)?.[1]}") { id userId user{name} description } }`
+                query: `mutation { GetMessages(chatroomId: "${id.match(/ObjectID\("(.+)"\)/)?.[1]}") { ID UserId User{Name} Description } }`
             }
             const results = await fetch(apiUrl, {
                 method: 'POST',
@@ -75,26 +72,31 @@ const MessagePage = () => {
             if (response.errors) {
                 setError("Error getting chat rooms");
             } else {
-                setMessages(response.data.GetMessages || []);
-            }
-        };
-
-        const ws = new WebSocket(`ws://localhost:8081/ws?chatroomID=${id.match(/ObjectID\("(.+)"\)/)?.[1]}`);
-        ws.onmessage = (event) => {
-            const messageData = JSON.parse(event.data);
-            messages.push(messageData);
-            console.log('Received message:', messageData);
+                setMessages(response.data.GetMessages);
+            };
         };
 
         getMessages();
-    }, [])
+    }, []);
+
+    console.log(messages);
+
+    useEffect(() => {
+        if (ws) {
+            ws.onmessage = (event) => {
+                const messageData = JSON.parse(event.data);
+                setMessages((prevMessages) => [...prevMessages, messageData]);
+                console.log('Received message:', messageData);
+            };
+        };
+    }, [ws]);
 
     return (
         <div>
             <h1>Chatroom: {name}</h1>
-            {messages.map((message) =>
-                <div key={message.id}>
-                    {message.user?.name}: {message.description}
+            {messages.map((message, index) =>
+                <div key={index}>
+                    {message?.User?.Name}: {message.Description}
                 </div>
             )}
             <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
