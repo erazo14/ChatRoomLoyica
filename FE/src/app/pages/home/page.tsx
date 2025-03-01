@@ -64,10 +64,10 @@ const HomePage = () => {
 
     return (
         <div>
-            {error && <p style={{ color: "red" }}>{error}</p>}
             <h1>
                 Chat Rooms
             </h1>
+            {error && <p style={{ color: "red" }}>{error}</p>}
             {chatrooms.length > 0 ? (
                 <ul>
                     {chatrooms.map(room => (

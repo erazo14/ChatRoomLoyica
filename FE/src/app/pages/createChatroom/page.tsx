@@ -8,7 +8,6 @@ const CreateChatroomPage = () => {
     const [name, setName] = useState('');
     const [userSelected, setUserSelected] = useState([]);
     const [error, setError] = useState('');
-    const [userGetted, setUserGetted] = useState([]);
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
 
     const onSubmit = async () => {
@@ -48,32 +47,6 @@ const CreateChatroomPage = () => {
         e.preventDefault();
         router.back();
     };
-
-    useEffect(() => {
-        const getUsers = async () => {
-            const userName = sessionStorage.getItem("loggedUser") ? JSON.parse(sessionStorage.getItem("loggedUser")) : router.replace('home');
-            const query = {
-                query: `mutation { getUsers(user: "${userName?.user}") { id Name user } }`
-            };
-            const results = await fetch(apiUrl, {
-                method: 'POST',
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(query)
-            })
-            const usersGetted = await results.json();
-            if (usersGetted.errors) {
-                setError("Error getting users")
-            } else {
-                setUserGetted(usersGetted?.data?.getUsers)
-            };
-        };
-
-        getUsers();
-    }, []);
 
     return (
         <div>
