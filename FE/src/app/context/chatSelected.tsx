@@ -10,7 +10,7 @@ export const ChatroomProvider = ({ children }) => {
 
     const setChatroomId = (chatroomId) => {
         setId(chatroomId);
-        setWs(new WebSocket(`ws://localhost:8081/ws?chatroomID=${chatroomId}`));
+        setWs(new WebSocket(`${process.env.NEXT_PUBLIC_URL_WS}?chatroomID=${chatroomId}`));
     };
 
     const setChatroomName = (roomName) => {
