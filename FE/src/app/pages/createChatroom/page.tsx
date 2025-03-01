@@ -49,15 +49,6 @@ const CreateChatroomPage = () => {
         router.back();
     };
 
-    const handleSelectChange = (e) => {
-        userGetted.map((user) => {
-            if (user.id == e.target.value) {
-                setName(user.Name);
-            }
-        })
-        setUserSelected([`"${e.target.value}"`])
-    }
-
     useEffect(() => {
         const getUsers = async () => {
             const userName = sessionStorage.getItem("loggedUser") ? JSON.parse(sessionStorage.getItem("loggedUser")) : router.replace('home');
@@ -92,19 +83,13 @@ const CreateChatroomPage = () => {
                     <div>
                         <label>Room Name: </label>
                     </div>
-                    <label>{name}</label>
-                </div>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>User:</label>
-                    </div>
-                    <select
-                        onChange={(e) => handleSelectChange(e)}
-                    >
-                        {userGetted.length && userGetted.map((user) =>
-                            <option key={user.id} value={user.id}>{user.Name}</option>
-                        )}
-                    </select>
+                    <input
+                        type="user"
+                        id="user"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
                 </div>
                 {error && <p>{error}</p>}
                 <div className={styles.buttonWrapper}>
