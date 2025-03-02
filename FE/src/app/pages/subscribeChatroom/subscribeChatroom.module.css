@@ -1,5 +1,21 @@
-.wrapper {
+.WrapperHeader {
     display: flex;
     justify-content: space-between;
+}
+
+.chatBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.buttonWrapper {
+    display: flex;
+    justify-content: flex-end;
     margin: 10px;
+}
+
+.button {
+    height: 25px;
+    margin-left: 5px
 }

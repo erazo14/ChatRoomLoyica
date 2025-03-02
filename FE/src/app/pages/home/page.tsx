@@ -8,7 +8,7 @@ import { Box, Button } from "@mui/material";
 
 const HomePage = () => {
     const router = useRouter();
-    const [error, setError] = useState('');
+    const [error, setError] = useState<string>('');
     const [loggedUser, setLoggedUser] = useState(null);
     const [chatrooms, setChatrooms] = useState([]);
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
@@ -106,7 +106,7 @@ const HomePage = () => {
             {error && <p style={{ color: "red" }}>{error}</p>}
             <div className={styles.buttonWrapper}>
                 <Button variant="contained" className={styles.button} onClick={logOut}>Log Out</Button>
-                <Button variant="contained" className={styles.button} onClick={subscribeRoom}>Subscribe Room</Button>
+                <Button variant="contained" className={styles.button} onClick={subscribeRoom}>Join Room</Button>
                 <Button variant="contained" className={styles.button} onClick={createRoom}>Create Room</Button>
             </div>
         </div>

@@ -2,17 +2,18 @@
 import { useEffect, useState } from "react";
 import styles from "./subscribeChatroom.module.css"
 import { useRouter } from "next/navigation";
+import { Box, Button } from "@mui/material";
 
 const SubscribeChatroomPage = () => {
     const router = useRouter();
     const [error, setError] = useState<string>('');
     const [chatrooms, setChatrooms] = useState([]);
-    const [userlogged, setUserLogged] = useState(undefined);
+    const [loggedUser, setLoggedUser] = useState(undefined);
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
 
     const handleSusbscribe = async (room) => {
         const query = {
-            query: `mutation { subscribeChatrooms(chatroomId: "${room.id}", userId: "${userlogged.id}") { id name users } }`
+            query: `mutation { subscribeChatrooms(chatroomId: "${room.id}", userId: "${loggedUser.id}") { id name users } }`
         };
         const results = await fetch(apiUrl, {
             method: 'POST',
@@ -27,7 +28,7 @@ const SubscribeChatroomPage = () => {
         if (subscribedChatroom.errors) {
             setError("Error getting users")
         } else {
-            room.users.push(userlogged.id)
+            room.users.push(loggedUser.id)
             router.refresh();
         };
     }
@@ -59,33 +60,41 @@ const SubscribeChatroomPage = () => {
         };
 
         getChatrooms();
-        setUserLogged(JSON.parse(sessionStorage.getItem("loggedUser")));
+        setLoggedUser(JSON.parse(sessionStorage.getItem("loggedUser")));
     }, []);
 
     return (
         <div>
-            <h1>
-                Subscribing Room
-            </h1>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
+                <h1>
+                    Joining Rooms
+                </h1>
+                {loggedUser && (<h1>{loggedUser.Name}</h1>)}
+            </Box>
+
             {chatrooms.length > 0 ? (
-                <ul>
+                <Box
+                    component="section"
+                    sx={{ p: 2, }}
+                >
                     {chatrooms.map(room => (
-                        <li
+                        <Box
+                            sx={{ p: 2, border: '1px solid grey' }}
+                            className={styles.chatBox}
                             key={room.id}
-                            className={styles.wrapper}
                             style={{ marginBottom: "10px" }}
                         >
                             {room.name}
-                            {!room.users.includes(userlogged.id) ? <button className={styles.button} onClick={() => handleSusbscribe(room)}>subscribe</button> : <p>Subscribed</p>}
-                        </li>
+                            {!room.users.includes(loggedUser.id) ? <Button variant="contained" className={styles.button} onClick={() => handleSusbscribe(room)}>Join</Button> : <p>Joined</p>}
+                        </Box>
                     ))}
-                </ul>
+                </Box>
             ) : (
                 <p>No chatrooms available.</p>
             )}
-            <div>
-                <button className={styles.button} onClick={handleBack}>back</button>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            <div className={styles.buttonWrapper}>
+                <Button variant="contained"className={styles.button} onClick={handleBack}>back</Button>
             </div>
         </div>
     );
