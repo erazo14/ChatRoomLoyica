@@ -28,8 +28,8 @@ import (
 )
 
 // Define enviorment Varaibles
-var uriDB = "mongodb://localhost:27017" //execute localhost
-// var uriDB = "mongodb://loyicadb:27017" //executo on docker
+// var uriDB = "mongodb://localhost:27017" //execute localhost
+var uriDB = "mongodb://loyicadb:27017" //executo on docker
 
 var DB_Name = "ChatRoomDB"
 var clientOptions *options.ClientOptions
