@@ -20,7 +20,7 @@ const HomePage = () => {
 
     const logOut = () => {
         sessionStorage.removeItem("loggedUser");
-        router.replace('login');
+        router.back();
     }
 
     const subscribeRoom = () => {

@@ -11,13 +11,6 @@
 }
 
 html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  align-items: center;
-  justify-items: center;
-  padding: 50px;
-}
 
 body {
   color: var(--foreground);

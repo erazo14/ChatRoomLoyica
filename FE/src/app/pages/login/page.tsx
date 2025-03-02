@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
 import { useState } from 'react';
+import { Box, Button, TextField } from "@mui/material";
 
 
 const LoginPage = () => {
@@ -49,38 +50,41 @@ const LoginPage = () => {
     };
 
     return (
-        <div>
-            <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>User:</label>
+        <div className={styles.loginWrapper}>
+            <Box
+                sx={{ p: 2, border: '1px solid grey' }}
+            >
+                <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
+                    <div className={styles.wrapperLabels}>
+                        <TextField
+
+                            label="User"
+                            type="text"
+                            variant="filled"
+                            id="user"
+                            value={user}
+                            onChange={(e) => setUser(e.target.value)}
+                            required
+                        />
                     </div>
-                    <input
-                        type="user"
-                        id="user"
-                        value={user}
-                        onChange={(e) => setUser(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>Password:</label>
+                    <div className={styles.wrapperLabels}>
+                        <TextField
+                            label="Password"
+                            variant="filled"
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                     </div>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p>{error}</p>}
-                <div>
-                    <button className={styles.button} onClick={handleSignUp}>Sign Up</button>
-                    <button className={styles.button} type="submit">Login</button>
-                </div>
-            </form>
+                    {error && <p>{error}</p>}
+                    <div className={styles.buttonWrapper}>
+                        <Button variant="contained" className={styles.button} onClick={handleSignUp}>Sign Up</Button>
+                        <Button variant="contained" className={styles.button} type="submit">Login</Button>
+                    </div>
+                </form>
+            </Box>
         </div>
     )
 }
