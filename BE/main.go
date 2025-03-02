@@ -128,13 +128,15 @@ func main() {
 	messageType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Message",
 		Fields: graphql.Fields{
-			"ID":          &graphql.Field{Type: graphql.String},
-			"ChatroomId":  &graphql.Field{Type: graphql.String},
-			"UserId":      &graphql.Field{Type: graphql.String},
-			"Description": &graphql.Field{Type: graphql.String},
-			"DateTime":    &graphql.Field{Type: graphql.DateTime},
-			"User":        &graphql.Field{Type: userType},
-			"Reaction":    &graphql.Field{Type: reactionType},
+			"ID":           &graphql.Field{Type: graphql.String},
+			"ChatroomId":   &graphql.Field{Type: graphql.String},
+			"UserId":       &graphql.Field{Type: graphql.String},
+			"Description":  &graphql.Field{Type: graphql.String},
+			"DateTime":     &graphql.Field{Type: graphql.DateTime},
+			"User":         &graphql.Field{Type: userType},
+			"Reaction":     &graphql.Field{Type: reactionType},
+			"LikeCount":    &graphql.Field{Type: graphql.Int},
+			"DislikeCount": &graphql.Field{Type: graphql.Int},
 		},
 	})
 
@@ -448,6 +450,18 @@ func main() {
 							"userid":    userId,
 						}).Decode(&reaction)
 
+						likeCount, err := reacionCollection.CountDocuments(context.TODO(), bson.M{
+							"messageid": message.ID,
+							"reactType": "like",
+						})
+
+						dislikeCount, err := reacionCollection.CountDocuments(context.TODO(), bson.M{
+							"messageid": message.ID,
+							"reactType": "dislike",
+						})
+
+						message.LikeCount = likeCount
+						message.DislikeCount = dislikeCount
 						message.User = user
 						message.Reaction = reaction
 						newMessage := map[string]interface{}{
@@ -460,6 +474,8 @@ func main() {
 							"Reaction": map[string]string{
 								"ReactType": reaction.ReactType,
 							},
+							"LikeCount":    likeCount,
+							"DislikeCount": dislikeCount,
 						}
 						messages = append(messages, newMessage)
 					}

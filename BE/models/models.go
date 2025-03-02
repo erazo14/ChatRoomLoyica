@@ -21,13 +21,15 @@ type Chatroom struct {
 }
 
 type Message struct {
-	ID          string             `bson:"_id,omitempty"`
-	ChatroomId  primitive.ObjectID `bson:"chatroomid"`
-	UserId      primitive.ObjectID `bson:"userid"`
-	Description string             `bson:"description"`
-	Datetime    string             `bson:"datetime"`
-	User        User               `bson:"user,omitempty"`
-	Reaction    Reaction           `bson:"reaction,omitempty"`
+	ID           string             `bson:"_id,omitempty"`
+	ChatroomId   primitive.ObjectID `bson:"chatroomid"`
+	UserId       primitive.ObjectID `bson:"userid"`
+	Description  string             `bson:"description"`
+	Datetime     string             `bson:"datetime"`
+	User         User               `bson:"user,omitempty"`
+	Reaction     Reaction           `bson:"reaction,omitempty"`
+	LikeCount    int64              `bson:"likeCount"`
+	DislikeCount int64              `bson:"dislikeCount"`
 }
 
 type Reaction struct {
