@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import styles from "./signup.module.css";
 import { useState } from "react";
+import { Box, Button, TextField } from "@mui/material";
 
 const SignUpPage = () => {
     const router = useRouter();
@@ -48,51 +49,59 @@ const SignUpPage = () => {
     };
 
     return (
-        <div>
-            <h1>Sign Up</h1>
-            <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>Name:</label>
+        <div className={styles.loginWrapper}>
+            <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
+                <h1>
+                    Sign Up
+                </h1>
+            </Box>
+            <Box
+                className={styles.loginWrapper}
+                sx={{ p: 2, border: '1px solid grey' }}
+            >
+                <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
+                    <div className={styles.wrapperLabels}>
+
+                        <TextField
+                            label="Name"
+                            variant="filled"
+                            type="name"
+                            id="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
                     </div>
-                    <input
-                        type="name"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>User:</label>
+                    <div className={styles.wrapperLabels}>
+
+                        <TextField
+                            label="User"
+                            variant="filled"
+                            type="user"
+                            id="user"
+                            value={user}
+                            onChange={(e) => setUser(e.target.value)}
+                            required
+                        />
                     </div>
-                    <input
-                        type="user"
-                        id="user"
-                        value={user}
-                        onChange={(e) => setUser(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>Password:</label>
+                    <div className={styles.wrapperLabels}>
+                        <TextField
+                            label="Password"
+                            variant="filled"
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
                     </div>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p>{error}</p>}
-                <div className={styles.buttonWrapper}>
-                    <button className={styles.button} onClick={handleBack}>back</button>
-                    <button className={styles.button} type="submit">sign Up</button>
-                </div>
-            </form>
+                    {error && <p>{error}</p>}
+                    <div className={styles.buttonWrapper}>
+                        <Button variant="contained" className={styles.button} onClick={handleBack}>back</Button>
+                        <Button variant="contained" className={styles.button} type="submit">sign Up</Button>
+                    </div>
+                </form>
+            </Box>
         </div>
     )
 };

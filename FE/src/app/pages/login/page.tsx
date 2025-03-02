@@ -51,13 +51,17 @@ const LoginPage = () => {
 
     return (
         <div className={styles.loginWrapper}>
+            <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
+                <h1>
+                    Login
+                </h1>
+            </Box>
             <Box
                 sx={{ p: 2, border: '1px solid grey' }}
             >
                 <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
                     <div className={styles.wrapperLabels}>
                         <TextField
-
                             label="User"
                             type="text"
                             variant="filled"
@@ -78,7 +82,7 @@ const LoginPage = () => {
                             required
                         />
                     </div>
-                    {error && <p>{error}</p>}
+                    {error && <p style={{ color: "red" }}>{error}</p>}
                     <div className={styles.buttonWrapper}>
                         <Button variant="contained" className={styles.button} onClick={handleSignUp}>Sign Up</Button>
                         <Button variant="contained" className={styles.button} type="submit">Login</Button>

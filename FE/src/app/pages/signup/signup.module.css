@@ -1,19 +1,28 @@
-.wrapperLogin {
-    width: 270px;
-}
-
-.wrapperLabels {
+.loginWrapper {
+    max-width: 100vw;
+    overflow-x: hidden;
+    align-items: center;
+    justify-items: center;
+    padding: 20px;
+  }
+  
+  .wrapperLogin {
+    width: 350px;
+  }
+  
+  .wrapperLabels {
     display: flex;
     justify-content: space-between;
     margin: 10px
-}
-
-.buttonWrapper {
+  }
+  
+  .buttonWrapper {
     display: flex;
     justify-content: flex-end;
     margin: 10px;
-}
-
-.button:last-child {
+  }
+  
+  .button {
+    height: 25px;
     margin-left: 5px
-}
+  }
