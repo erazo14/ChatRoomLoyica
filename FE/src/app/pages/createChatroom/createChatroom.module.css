@@ -1,11 +1,14 @@
-.wrapperLogin {
-    width: 270px;
-}
-
-.wrapperLabels {
+.WrapperHeader {
     display: flex;
     justify-content: space-between;
-    margin: 10px
+}
+
+.loginWrapper {
+    max-width: 100vw;
+    overflow-x: hidden;
+    align-items: center;
+    justify-items: center;
+    padding: 20px;
 }
 
 .buttonWrapper {
@@ -14,6 +17,7 @@
     margin: 10px;
 }
 
-.button:last-child {
+.button {
+    height: 25px;
     margin-left: 5px
 }

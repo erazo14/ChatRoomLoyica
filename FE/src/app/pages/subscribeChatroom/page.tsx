@@ -94,7 +94,7 @@ const SubscribeChatroomPage = () => {
             )}
             {error && <p style={{ color: "red" }}>{error}</p>}
             <div className={styles.buttonWrapper}>
-                <Button variant="contained"className={styles.button} onClick={handleBack}>back</Button>
+                <Button variant="contained" className={styles.button} onClick={handleBack}>back</Button>
             </div>
         </div>
     );

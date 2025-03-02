@@ -1,11 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
 import styles from "./createChatroom.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Box, Button, TextField } from "@mui/material";
 
 const CreateChatroomPage = () => {
     const router = useRouter();
-    const [name, setName] = useState('');
+    const [name, setName] = useState<string>('');
+    const [loggedUser, setLoggedUser] = useState(null);
     const [error, setError] = useState('');
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
 
@@ -45,29 +47,40 @@ const CreateChatroomPage = () => {
         e.preventDefault();
         router.back();
     };
+    useEffect(() => {
+        setLoggedUser(JSON.parse(sessionStorage.getItem("loggedUser")));
+    }, []);
 
     return (
-        <div>
-            <h1>Create Room</h1>
-            <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>Room Name: </label>
+        <div className={styles.loginWrapper}>
+            <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
+                <h1>
+                    Create Room
+                </h1>
+                {loggedUser && (<h1>{loggedUser.Name}</h1>)}
+            </Box>
+            <Box
+                sx={{ p: 2, border: '1px solid grey' }}
+            >
+                <form className={styles.loginWrapper} onSubmit={handleSubmit}>
+                    <div className={styles.wrapperLabels}>
+                        <TextField
+                            label="Name"
+                            variant="filled"
+                            type="user"
+                            id="user"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
                     </div>
-                    <input
-                        type="user"
-                        id="user"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p>{error}</p>}
-                <div className={styles.buttonWrapper}>
-                    <button className={styles.button} onClick={handleBack}>back</button>
-                    <button className={styles.button} type="submit">Create Room</button>
-                </div>
-            </form>
+                    {error && <p style={{ color: "red" }}>{error}</p>}
+                    <div className={styles.buttonWrapper}>
+                        <Button variant="contained" className={styles.button} onClick={handleBack}>back</Button>
+                        <Button variant="contained" className={styles.button} type="submit">Create Room</Button>
+                    </div>
+                </form>
+            </Box>
         </div>
     )
 };
