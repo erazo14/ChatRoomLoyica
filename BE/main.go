@@ -127,6 +127,16 @@ func main() {
 		},
 	})
 
+	reactionType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Reaction",
+		Fields: graphql.Fields{
+			"Id":        &graphql.Field{Type: graphql.String},
+			"MessageId": &graphql.Field{Type: graphql.String},
+			"UserId":    &graphql.Field{Type: graphql.String},
+			"ReactType": &graphql.Field{Type: graphql.String},
+		},
+	})
+
 	// Define a basic Query type
 	queryType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Query",
@@ -438,6 +448,64 @@ func main() {
 					}
 
 					return messages, nil
+				},
+			},
+			"reactMessage": &graphql.Field{
+				Type: reactionType,
+				Args: graphql.FieldConfigArgument{
+					"messageId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"userId":    &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"reactType": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					messageId := p.Args["messageId"].(string)
+					userId := p.Args["userId"].(string)
+					reactType := p.Args["reactType"].(string)
+					messageObjID, err := primitive.ObjectIDFromHex(messageId)
+					if err != nil {
+						return nil, fmt.Errorf("Invalid message Id format")
+					}
+					userObjID, err := primitive.ObjectIDFromHex(userId)
+					if err != nil {
+						return nil, fmt.Errorf("Invalid user Id format")
+					}
+
+					reactionCollection := client.Database(DB_Name).Collection("Reaction")
+
+					var reaction models.Reaction
+					err = reactionCollection.FindOne(context.TODO(), bson.M{
+						"messageid": messageObjID.Hex(),
+						"userid":    userObjID.Hex(),
+					}).Decode(&reaction)
+
+					if err != nil {
+						if err == mongo.ErrNoDocuments {
+							reaction = models.Reaction{
+								MessageId: messageObjID.Hex(),
+								UserId:    userObjID.Hex(),
+								ReactType: reactType,
+							}
+
+							_, err = reactionCollection.InsertOne(context.TODO(), reaction)
+							if err != nil {
+								return nil, fmt.Errorf("Error inserting new reaction: %v", err)
+							}
+						}
+					} else {
+						update := bson.M{"$set": bson.M{"reactType": reactType}}
+						reactionObjID, err := primitive.ObjectIDFromHex(reaction.ID)
+						_, err = reactionCollection.UpdateByID(context.TODO(), reactionObjID, update)
+						if err != nil {
+							return nil, fmt.Errorf("Error updating reaction: %v", err)
+						}
+
+						err = reactionCollection.FindOne(context.TODO(), bson.M{"_id": reactionObjID}).Decode(&reaction)
+						if err != nil {
+							return nil, fmt.Errorf("Error retrieving updated reaction: %v", err)
+						}
+					}
+
+					return reaction, nil
 				},
 			},
 		},

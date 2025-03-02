@@ -29,6 +29,13 @@ type Message struct {
 	User        User               `bson:"user,omitempty"`
 }
 
+type Reaction struct {
+	ID        string `bson:"_id,omitempty"`
+	MessageId string `bson:"messageid"`
+	UserId    string `bson:"userid"`
+	ReactType string `bson:"reactType"`
+}
+
 type Time struct {
 	CurrenTime string `json:"current_time"`
 }
