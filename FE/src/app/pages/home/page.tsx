@@ -3,11 +3,13 @@ import styles from "./home.module.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useChatroom } from "../../context/chatSelected";
+import { Box, Button } from "@mui/material";
 
 
 const HomePage = () => {
     const router = useRouter();
     const [error, setError] = useState('');
+    const [loggedUser, setLoggedUser] = useState(null);
     const [chatrooms, setChatrooms] = useState([]);
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
     const { setChatroomId, setChatroomName } = useChatroom();
@@ -34,6 +36,7 @@ const HomePage = () => {
     useEffect(() => {
         const getChatrooms = async () => {
             const userData = JSON.parse(sessionStorage.getItem('loggedUser'));
+            setLoggedUser(userData);
             if (!userData) {
                 router.push('/login');
                 return;
@@ -68,29 +71,43 @@ const HomePage = () => {
 
     return (
         <div>
-            <h1>
-                Chat Rooms
-            </h1>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
+                <h1>
+                    Chat Rooms
+                </h1>
+                {loggedUser && (<h1>{loggedUser.Name}</h1>)}
+            </Box>
+
             {chatrooms.length > 0 ? (
-                <ul>
+                <Box
+                    component="section"
+                    sx={{ p: 2, }}
+                >
                     {chatrooms.map(room => (
-                        <li
+                        <Box
+                            sx={{ p: 2, border: '1px solid grey' }}
+                            className={styles.chatBox}
                             key={room.id}
                             onClick={() => handleChatroomClick(room)}
-                            style={{ cursor: "pointer", color: "blue", textDecoration: "underline", marginBottom: "10px" }}
+                            style={{ cursor: "pointer", marginBottom: "10px" }}
                         >
-                            {room.name}
-                        </li>
+                            <h2 className={styles.labelName} >
+                                Nombre del Chat:
+                            </h2>
+                            <h3>
+                                {room.name}
+                            </h3>
+                        </Box>
                     ))}
-                </ul>
+                </Box>
             ) : (
                 <p>No chatrooms available.</p>
             )}
+            {error && <p style={{ color: "red" }}>{error}</p>}
             <div className={styles.buttonWrapper}>
-                <button className={styles.button} onClick={logOut}>Log Out</button>
-                <button className={styles.button} onClick={subscribeRoom}>Subscribe Room</button>
-                <button className={styles.button} onClick={createRoom}>Create Room</button>
+                <Button variant="contained" className={styles.button} onClick={logOut}>Log Out</Button>
+                <Button variant="contained" className={styles.button} onClick={subscribeRoom}>Subscribe Room</Button>
+                <Button variant="contained" className={styles.button} onClick={createRoom}>Create Room</Button>
             </div>
         </div>
     )
