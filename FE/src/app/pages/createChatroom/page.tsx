@@ -12,7 +12,7 @@ const CreateChatroomPage = () => {
     const onSubmit = async () => {
         const user = JSON.parse(sessionStorage.getItem("loggedUser"));
         const query = {
-            query: `mutation { createChatroom(name: "${name}" ,users: [${user.id}]) { name users } }`
+            query: `mutation { createChatroom(name: "${name}" ,users: ["${user.id}"]) { name users } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',
