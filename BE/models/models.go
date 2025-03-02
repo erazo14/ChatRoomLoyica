@@ -21,7 +21,7 @@ type Chatroom struct {
 }
 
 type Message struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	ID          string             `bson:"_id,omitempty"`
 	ChatroomId  primitive.ObjectID `bson:"chatroomid"`
 	UserId      primitive.ObjectID `bson:"userid"`
 	Description string             `bson:"description"`

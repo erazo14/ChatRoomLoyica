@@ -291,10 +291,12 @@ func main() {
 
 					message := models.Message{ChatroomId: objChatroomID, UserId: objUserID, Description: description, Datetime: time.Now().Format(http.TimeFormat)}
 					messageCollection := client.Database(DB_Name).Collection("Message")
-					_, err = messageCollection.InsertOne(context.TODO(), message)
+					result, err := messageCollection.InsertOne(context.TODO(), message)
 					if err != nil {
 						return nil, err
 					}
+					insertedID := result.InsertedID.(primitive.ObjectID).Hex()
+					message.ID = insertedID
 					message.User = foundUser
 					subManager.Publish(chatroomId, &message)
 					return message, nil
@@ -409,9 +411,11 @@ func main() {
 				Type: graphql.NewList(messageType),
 				Args: graphql.FieldConfigArgument{
 					"chatroomId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+					"userId":     &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					chatroomId := p.Args["chatroomId"].(string)
+					userId := p.Args["userId"].(string)
 
 					objChatroomID, err := primitive.ObjectIDFromHex(chatroomId)
 					if err != nil {
@@ -440,14 +444,14 @@ func main() {
 						reacionCollection := client.Database(DB_Name).Collection("Reaction")
 						var reaction models.Reaction
 						err = reacionCollection.FindOne(context.TODO(), bson.M{
-							"messageid": message.ID.Hex(),
-							"userid":    message.UserId.Hex(),
+							"messageid": message.ID,
+							"userid":    userId,
 						}).Decode(&reaction)
 
 						message.User = user
 						message.Reaction = reaction
 						newMessage := map[string]interface{}{
-							"ID":          message.ID.Hex(),
+							"ID":          message.ID,
 							"Description": message.Description,
 							"UserId":      user.ID,
 							"User": map[string]string{
