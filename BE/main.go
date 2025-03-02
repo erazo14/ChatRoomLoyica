@@ -115,6 +115,16 @@ func main() {
 		},
 	})
 
+	reactionType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Reaction",
+		Fields: graphql.Fields{
+			"Id":        &graphql.Field{Type: graphql.String},
+			"MessageId": &graphql.Field{Type: graphql.String},
+			"UserId":    &graphql.Field{Type: graphql.String},
+			"ReactType": &graphql.Field{Type: graphql.String},
+		},
+	})
+
 	messageType := graphql.NewObject(graphql.ObjectConfig{
 		Name: "Message",
 		Fields: graphql.Fields{
@@ -124,16 +134,7 @@ func main() {
 			"Description": &graphql.Field{Type: graphql.String},
 			"DateTime":    &graphql.Field{Type: graphql.DateTime},
 			"User":        &graphql.Field{Type: userType},
-		},
-	})
-
-	reactionType := graphql.NewObject(graphql.ObjectConfig{
-		Name: "Reaction",
-		Fields: graphql.Fields{
-			"Id":        &graphql.Field{Type: graphql.String},
-			"MessageId": &graphql.Field{Type: graphql.String},
-			"UserId":    &graphql.Field{Type: graphql.String},
-			"ReactType": &graphql.Field{Type: graphql.String},
+			"Reaction":    &graphql.Field{Type: reactionType},
 		},
 	})
 
@@ -435,13 +436,25 @@ func main() {
 						if err != nil {
 							return nil, fmt.Errorf("User not found for message with ID: %v", message.UserId)
 						}
+
+						reacionCollection := client.Database(DB_Name).Collection("Reaction")
+						var reaction models.Reaction
+						err = reacionCollection.FindOne(context.TODO(), bson.M{
+							"messageid": message.ID.Hex(),
+							"userid":    message.UserId.Hex(),
+						}).Decode(&reaction)
+
 						message.User = user
+						message.Reaction = reaction
 						newMessage := map[string]interface{}{
 							"ID":          message.ID.Hex(),
 							"Description": message.Description,
 							"UserId":      user.ID,
 							"User": map[string]string{
 								"Name": user.Name,
+							},
+							"Reaction": map[string]string{
+								"ReactType": reaction.ReactType,
 							},
 						}
 						messages = append(messages, newMessage)

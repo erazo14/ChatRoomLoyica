@@ -27,6 +27,7 @@ type Message struct {
 	Description string             `bson:"description"`
 	Datetime    string             `bson:"datetime"`
 	User        User               `bson:"user,omitempty"`
+	Reaction    Reaction           `bson:"reaction,omitempty"`
 }
 
 type Reaction struct {
