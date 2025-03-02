@@ -84,7 +84,7 @@ const MessagePage = () => {
             const user = JSON.parse(sessionStorage.getItem('loggedUser'))
             setLoggedUser(user)
             const query = {
-                query: `mutation { GetMessages(chatroomId: "${id}", userId: "${user.id}") { ID UserId User{Name} Description Reaction {ReactType} } }`
+                query: `mutation { GetMessages(chatroomId: "${id}", userId: "${user.id}") { ID UserId User{Name} Description Reaction {ReactType} LikeCount DislikeCount } }`
             }
             const results = await fetch(apiUrl, {
                 method: 'POST',
@@ -156,22 +156,32 @@ const MessagePage = () => {
                             <span>{message.Description}</span>
                         </Box>
                             <>
-                                <Image
-                                    className={styles.logo}
-                                    src="/like.png"
-                                    alt="Like"
-                                    width={20}
-                                    height={20}
-                                    onClick={() => handleLikeDislike(message, "like")}
-                                />
-                                <Image
-                                    className={styles.logo}
-                                    src="/dislike.png"
-                                    alt="Dislike"
-                                    width={20}
-                                    height={20}
-                                    onClick={() => handleLikeDislike(message, "dislike")}
-                                />
+                                <Box
+                                className={styles.countWrapper}
+                                >
+                                    <Image
+                                        className={styles.logo}
+                                        src="/like.png"
+                                        alt="Like"
+                                        width={20}
+                                        height={20}
+                                        onClick={() => handleLikeDislike(message, "like")}
+                                    />
+                                    {message?.LikeCount}
+                                </Box>
+                                <Box
+                                className={styles.countWrapper}
+                                >
+                                    <Image
+                                        className={styles.logo}
+                                        src="/dislike.png"
+                                        alt="Dislike"
+                                        width={20}
+                                        height={20}
+                                        onClick={() => handleLikeDislike(message, "dislike")}
+                                    />
+                                    {message?.DislikeCount}
+                                </Box>
                             </>
                     </div>
                 )}

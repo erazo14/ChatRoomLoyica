@@ -64,3 +64,9 @@
 .logo {
   background: white;
 }
+
+.countWrapper {
+  margin: 2px;
+  display: flex;
+  align-items: end;
+}
