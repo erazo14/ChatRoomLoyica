@@ -23,8 +23,8 @@ Make sure you have the following installed:
 ### 2. Set Up Environment Variables
 Create a `.env.local` file in the FE/ directory and configure the environment variables:
 ```sh
-NEXT_PUBLIC_URL_API=http://localhost:8081/graphql
-NEXT_PUBLIC_URL_WS=ws://localhost:8081/ws
+NEXT_PUBLIC_URL_API=http://localhost:8080/graphql
+NEXT_PUBLIC_URL_WS=ws://localhost:8080/ws
 ```
 
 Do you want to run localy the projet need to modify the Backeng line on `BE/main.go` the following varaible on line 30:

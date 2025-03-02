@@ -8,7 +8,6 @@ import Image from "next/image";
 const MessagePage = () => {
     const router = useRouter();
     const { id, name, ws } = useChatroom();
-    const [ loggedUser,  setLoggedUser ] = useState(JSON.parse(sessionStorage.getItem("loggedUser")));
     const [error, setError] = useState('');
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
     const [messages, setMessages] = useState([]);
@@ -25,14 +24,10 @@ const MessagePage = () => {
     };
 
     const onSubmit = async () => {
-        if (!loggedUser) {
-            router.push('/login');
-            return;
-        }
-        const userId = loggedUser?.id;
+        const user = JSON.parse(sessionStorage.getItem('loggedUser'))
 
         const query = {
-            query: `mutation { createMessage(chatroomId: "${id}", userId: "${userId}", description: "${sendMessage}") { ID UserId User{Name} Description } }`
+            query: `mutation { createMessage(chatroomId: "${id}", userId: "${user.id}", description: "${sendMessage}") { ID UserId User{Name} Description } }`
         }
         const results = await fetch(apiUrl, {
             method: 'POST',
@@ -58,8 +53,9 @@ const MessagePage = () => {
     };
 
     const handleLikeDislike = async (message, reaction) => {
+        const user = JSON.parse(sessionStorage.getItem('loggedUser'))
         const query = {
-            query: `mutation { reactMessage(messageId: "${message.ID}", userId:  "${loggedUser.id}", reactType: "${reaction}") { Id  MessageId UserId ReactType } }`
+            query: `mutation { reactMessage(messageId: "${message.ID}", userId:  "${user.id}", reactType: "${reaction}") { Id  MessageId UserId ReactType } }`
         }
 
         const results = await fetch(apiUrl, {
@@ -70,24 +66,24 @@ const MessagePage = () => {
 
         const response = await results.json();
 
-            if (response.errors) {
-                setError("Error Reacting message");
-            } else {
-                setMessages(prevMessages =>
-                    prevMessages.map(msg =>
-                      msg.ID === message.ID
+        if (response.errors) {
+            setError("Error Reacting message");
+        } else {
+            setMessages(prevMessages =>
+                prevMessages.map(msg =>
+                    msg.ID === message.ID
                         ? { ...msg, Reaction: { ...msg.Reaction, ReactType: reaction } }
                         : msg
-                    )
-                  );
-            };
+                )
+            );
+        };
     };
 
     useEffect(() => {
-        setLoggedUser(JSON.parse(sessionStorage.getItem("loggedUser")))
         const getMessages = async () => {
+            const user = JSON.parse(sessionStorage.getItem('loggedUser'))
             const query = {
-                query: `mutation { GetMessages(chatroomId: "${id}", userId: "${loggedUser.id}") { ID UserId User{Name} Description Reaction {ReactType} } }`
+                query: `mutation { GetMessages(chatroomId: "${id}", userId: "${user.id}") { ID UserId User{Name} Description Reaction {ReactType} } }`
             }
             const results = await fetch(apiUrl, {
                 method: 'POST',
@@ -124,7 +120,7 @@ const MessagePage = () => {
                     {message?.User?.Name}: {message.Description}
                     {!message.Reaction?.ReactType ? (
                         <></>
-                    ):message.Reaction.ReactType === "like" ? (
+                    ) : message.Reaction.ReactType === "like" ? (
                         <Image
                             className={styles.logo}
                             src="/like.png"
