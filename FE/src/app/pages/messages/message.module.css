@@ -1,5 +1,47 @@
-.wrapperLogin {
-  width: 270px;
+.WrapperHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mineFather {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.otherFather {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.mine {
+  border: 1px solid blue;
+  background-color: lightblue;
+  height: 50px;
+  line-height: 30px;
+  border-radius: 10%;
+  margin: 3px;
+  padding: 10px;
+  width: fit-content;
+}
+
+.other {
+  border: 1px solid grey;
+  background-color: lightgray;
+  height: 50px;
+  line-height: 30px;
+  border-radius: 10%;
+  margin: 3px;
+  padding: 10px;
+  width: fit-content;
+}
+
+.messageWrapper {
+  max-width: 100vw;
+  overflow-x: hidden;
+  align-items: center;
+  padding: 20px;
+  width: 80%;
+  margin: auto;
 }
 
 .wrapperLabels {
@@ -14,10 +56,11 @@
   margin: 10px;
 }
 
-.button:last-child {
+.button {
+  height: 25px;
   margin-left: 5px
 }
 
-.logo{
+.logo {
   background: white;
 }

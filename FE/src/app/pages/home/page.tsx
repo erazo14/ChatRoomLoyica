@@ -85,11 +85,11 @@ const HomePage = () => {
                 >
                     {chatrooms.map(room => (
                         <Box
-                            sx={{ p: 2, border: '1px solid grey' }}
+                            sx={{ p: 2, border: '1px solid' }}
                             className={styles.chatBox}
                             key={room.id}
                             onClick={() => handleChatroomClick(room)}
-                            style={{ cursor: "pointer", marginBottom: "10px" }}
+                            style={{ cursor: "pointer"}}
                         >
                             <h2 className={styles.labelName} >
                                 Nombre del Chat:

@@ -4,11 +4,13 @@ import styles from "./message.module.css";
 import { useChatroom } from "../../context/chatSelected";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Box, Button, TextField } from "@mui/material";
 
 const MessagePage = () => {
     const router = useRouter();
     const { id, name, ws } = useChatroom();
     const [error, setError] = useState('');
+    const [loggedUser, setLoggedUser] = useState(null);
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
     const [messages, setMessages] = useState([]);
     const [sendMessage, setSendMessage] = useState('');
@@ -41,9 +43,6 @@ const MessagePage = () => {
         const response = await results.json();
         if (response.errors) {
             setError("Message doesn't send it")
-        } else {
-            console.log(response);
-            // setMessages((prevMessages) => [...prevMessages, response.data.createMessage]);
         }
     }
 
@@ -83,6 +82,7 @@ const MessagePage = () => {
     useEffect(() => {
         const getMessages = async () => {
             const user = JSON.parse(sessionStorage.getItem('loggedUser'))
+            setLoggedUser(user)
             const query = {
                 query: `mutation { GetMessages(chatroomId: "${id}", userId: "${user.id}") { ID UserId User{Name} Description Reaction {ReactType} } }`
             }
@@ -108,67 +108,94 @@ const MessagePage = () => {
             ws.onmessage = (event) => {
                 const messageData = JSON.parse(event.data);
                 setMessages((prevMessages) => [...prevMessages, messageData]);
-                console.log('Received message:', messageData);
             };
         };
     }, [ws]);
 
     return (
         <div>
-            <h1>Chatroom: {name}</h1>
-            {messages.map((message) =>
-                <div key={message.ID}>
-                    {message?.User?.Name}: {message.Description}
-                    {!message.Reaction?.ReactType ? (
-                        <></>
-                    ) : message.Reaction.ReactType === "like" ? (
-                        <Image
-                            className={styles.logo}
-                            src="/like.png"
-                            alt="Like"
-                            width={20}
-                            height={20}
-                        />
-                    ) : (
-                        <Image
-                            className={styles.logo}
-                            src="/dislike.png"
-                            alt="Dislike"
-                            width={20}
-                            height={20}
-                        />
-                    )}
-                    {!message.Reaction?.ReactType ? (
-                        <>
-                            <button className={styles.button} onClick={() => handleLikeDislike(message, "like")}>Like</button>
-                            <button className={styles.button} onClick={() => handleLikeDislike(message, "dislike")}>Dislike</button>
-                        </>
-                    ) : message.Reaction.ReactType === "like" ? (
-                        <button className={styles.button} onClick={() => handleLikeDislike(message, "dislike")}>Dislike</button>
-                    ) : (
-                        <button className={styles.button} onClick={() => handleLikeDislike(message, "like")}>Like</button>
-                    )}
-                </div>
-            )}
-            <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                <div className={styles.wrapperLabels}>
-                    <div>
-                        <label>Message:</label>
+            <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
+                <h1>
+                    Chat Room: {name}
+                </h1>
+                {loggedUser && (<h1>{loggedUser.Name}</h1>)}
+            </Box>
+            <Box
+                className={styles.messageWrapper}
+                sx={{ p: 2, border: '1px solid grey', 'marginBottom': '50px !important' }}
+            >
+                {messages.map((message) =>
+                    <div
+                        key={message.ID}
+                        className={message?.UserId == loggedUser.id ? styles.mineFather : styles.otherFather}
+                    >
+                        {!message.Reaction?.ReactType ? (
+                            <></>
+                        ) : message.Reaction.ReactType === "like" ? (
+                            <Image
+                                className={styles.logo}
+                                src="/like.png"
+                                alt="Like"
+                                width={20}
+                                height={20}
+                            />
+                        ) : (
+                            <Image
+                                className={styles.logo}
+                                src="/dislike.png"
+                                alt="Dislike"
+                                width={20}
+                                height={20}
+                            />
+                        )}
+
+                        <Box
+                            className={message?.UserId == loggedUser.id ? styles.mine : styles.other}
+                        >
+                            {message?.UserId != loggedUser.id && (<span>  {message?.User?.Name}:  </span>)}
+                            <span>{message.Description}</span>
+                        </Box>
+                            <>
+                                <Image
+                                    className={styles.logo}
+                                    src="/like.png"
+                                    alt="Like"
+                                    width={20}
+                                    height={20}
+                                    onClick={() => handleLikeDislike(message, "like")}
+                                />
+                                <Image
+                                    className={styles.logo}
+                                    src="/dislike.png"
+                                    alt="Dislike"
+                                    width={20}
+                                    height={20}
+                                    onClick={() => handleLikeDislike(message, "dislike")}
+                                />
+                            </>
                     </div>
-                    <input
-                        type="send"
-                        id="send"
-                        value={sendMessage}
-                        onChange={(e) => setSendMessage(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p>{error}</p>}
-                <div className={styles.buttonWrapper}>
-                    <button className={styles.button} onClick={handleBack}>Back</button>
-                    <button className={styles.button} type="submit">Send Message</button>
-                </div>
-            </form>
+                )}
+
+                <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
+                    <div className={styles.wrapperLabels}>
+                        <TextField
+                            label="Message"
+                            variant="filled"
+                            fullWidth
+                            type="send"
+                            id="send"
+                            value={sendMessage}
+                            onChange={(e) => setSendMessage(e.target.value)}
+                            required
+                        />
+                    </div>
+                    {error && <p>{error}</p>}
+                    <div className={styles.buttonWrapper}>
+                        <Button variant="contained" className={styles.button} onClick={handleBack}>Back</Button>
+                        <Button variant="contained" className={styles.button} type="submit">Send Message</Button>
+                    </div>
+                </form>
+            </Box>
         </div>
     )
 }
