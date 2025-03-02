@@ -132,21 +132,30 @@ const MessagePage = () => {
                         {!message.Reaction?.ReactType ? (
                             <></>
                         ) : message.Reaction.ReactType === "like" ? (
-                            <Image
-                                className={styles.logo}
-                                src="/like.png"
-                                alt="Like"
-                                width={20}
-                                height={20}
-                            />
+                            <Box
+                                className={styles.countWrapper}
+                            >
+                                <Image
+
+                                    className={styles.logo}
+                                    src="/like.png"
+                                    alt="Like"
+                                    width={20}
+                                    height={20}
+                                />
+                            </Box >
                         ) : (
-                            <Image
-                                className={styles.logo}
-                                src="/dislike.png"
-                                alt="Dislike"
-                                width={20}
-                                height={20}
-                            />
+                            <Box
+                                className={styles.countWrapper}
+                            >
+                                <Image
+                                    className={styles.logo}
+                                    src="/dislike.png"
+                                    alt="Dislike"
+                                    width={20}
+                                    height={20}
+                                />
+                            </Box>
                         )}
 
                         <Box
@@ -155,34 +164,34 @@ const MessagePage = () => {
                             {message?.UserId != loggedUser.id && (<span>  {message?.User?.Name}:  </span>)}
                             <span>{message.Description}</span>
                         </Box>
-                            <>
-                                <Box
+                        <>
+                            <Box
                                 className={styles.countWrapper}
-                                >
-                                    <Image
-                                        className={styles.logo}
-                                        src="/like.png"
-                                        alt="Like"
-                                        width={20}
-                                        height={20}
-                                        onClick={() => handleLikeDislike(message, "like")}
-                                    />
-                                    {message?.LikeCount}
-                                </Box>
-                                <Box
+                            >
+                                <Image
+                                    className={styles.logo}
+                                    src="/like.png"
+                                    alt="Like"
+                                    width={20}
+                                    height={20}
+                                    onClick={() => handleLikeDislike(message, "like")}
+                                />
+                                {message?.LikeCount}
+                            </Box>
+                            <Box
                                 className={styles.countWrapper}
-                                >
-                                    <Image
-                                        className={styles.logo}
-                                        src="/dislike.png"
-                                        alt="Dislike"
-                                        width={20}
-                                        height={20}
-                                        onClick={() => handleLikeDislike(message, "dislike")}
-                                    />
-                                    {message?.DislikeCount}
-                                </Box>
-                            </>
+                            >
+                                <Image
+                                    className={styles.logo}
+                                    src="/dislike.png"
+                                    alt="Dislike"
+                                    width={20}
+                                    height={20}
+                                    onClick={() => handleLikeDislike(message, "dislike")}
+                                />
+                                {message?.DislikeCount}
+                            </Box>
+                        </>
                     </div>
                 )}
 
