@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import styles from "./message.module.css";
 import { useChatroom } from "../../context/chatSelected";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const MessagePage = () => {
     const router = useRouter();
     const { id, name, ws } = useChatroom();
+    const [ loggedUser,  setLoggedUser ] = useState(JSON.parse(sessionStorage.getItem("loggedUser")));
     const [error, setError] = useState('');
     const apiUrl = process.env.NEXT_PUBLIC_URL_API;
     const [messages, setMessages] = useState([]);
@@ -23,12 +25,11 @@ const MessagePage = () => {
     };
 
     const onSubmit = async () => {
-        const userData = JSON.parse(sessionStorage.getItem('loggedUser'));
-        if (!userData) {
+        if (!loggedUser) {
             router.push('/login');
             return;
         }
-        const userId = userData?.id;
+        const userId = loggedUser?.id;
 
         const query = {
             query: `mutation { createMessage(chatroomId: "${id}", userId: "${userId}", description: "${sendMessage}") { ID UserId User{Name} Description } }`
@@ -56,10 +57,37 @@ const MessagePage = () => {
         router.back();
     };
 
+    const handleLikeDislike = async (message, reaction) => {
+        const query = {
+            query: `mutation { reactMessage(messageId: "${message.ID}", userId:  "${loggedUser.id}", reactType: "${reaction}") { Id  MessageId UserId ReactType } }`
+        }
+
+        const results = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(query)
+        });
+
+        const response = await results.json();
+
+            if (response.errors) {
+                setError("Error Reacting message");
+            } else {
+                setMessages(prevMessages =>
+                    prevMessages.map(msg =>
+                      msg.ID === message.ID
+                        ? { ...msg, Reaction: { ...msg.Reaction, ReactType: reaction } }
+                        : msg
+                    )
+                  );
+            };
+    };
+
     useEffect(() => {
+        setLoggedUser(JSON.parse(sessionStorage.getItem("loggedUser")))
         const getMessages = async () => {
             const query = {
-                query: `mutation { GetMessages(chatroomId: "${id}") { ID UserId User{Name} Description } }`
+                query: `mutation { GetMessages(chatroomId: "${id}", userId: "${loggedUser.id}") { ID UserId User{Name} Description Reaction {ReactType} } }`
             }
             const results = await fetch(apiUrl, {
                 method: 'POST',
@@ -75,7 +103,6 @@ const MessagePage = () => {
                 setMessages(response.data.GetMessages);
             };
         };
-
         getMessages();
     }, []);
 
@@ -92,9 +119,38 @@ const MessagePage = () => {
     return (
         <div>
             <h1>Chatroom: {name}</h1>
-            {messages.map((message, index) =>
-                <div key={index}>
+            {messages.map((message) =>
+                <div key={message.ID}>
                     {message?.User?.Name}: {message.Description}
+                    {!message.Reaction?.ReactType ? (
+                        <></>
+                    ):message.Reaction.ReactType === "like" ? (
+                        <Image
+                            className={styles.logo}
+                            src="/like.png"
+                            alt="Like"
+                            width={20}
+                            height={20}
+                        />
+                    ) : (
+                        <Image
+                            className={styles.logo}
+                            src="/dislike.png"
+                            alt="Dislike"
+                            width={20}
+                            height={20}
+                        />
+                    )}
+                    {!message.Reaction?.ReactType ? (
+                        <>
+                            <button className={styles.button} onClick={() => handleLikeDislike(message, "like")}>Like</button>
+                            <button className={styles.button} onClick={() => handleLikeDislike(message, "dislike")}>Dislike</button>
+                        </>
+                    ) : message.Reaction.ReactType === "like" ? (
+                        <button className={styles.button} onClick={() => handleLikeDislike(message, "dislike")}>Dislike</button>
+                    ) : (
+                        <button className={styles.button} onClick={() => handleLikeDislike(message, "like")}>Like</button>
+                    )}
                 </div>
             )}
             <form className={styles.wrapperLogin} onSubmit={handleSubmit}>

@@ -17,3 +17,7 @@
 .button:last-child {
   margin-left: 5px
 }
+
+.logo{
+  background: white;
+}
