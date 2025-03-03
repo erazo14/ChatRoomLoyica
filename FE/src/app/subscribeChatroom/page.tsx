@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import styles from "./subscribeChatroom.module.css"
 import { useRouter } from "next/navigation";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 const SubscribeChatroomPage = () => {
     const router = useRouter();
@@ -73,22 +73,27 @@ const SubscribeChatroomPage = () => {
             </Box>
 
             {chatrooms.length > 0 ? (
-                <Box
+                <List
                     component="section"
                     sx={{ p: 2, }}
                 >
-                    {chatrooms.map(room => (
-                        <Box
-                            sx={{ p: 2, border: '1px solid grey' }}
+                    {chatrooms.map((room, index) => (<Box
+                        key={room.id}
+                    >
+                        {index != 0 && <Divider />}
+                        <ListItem
                             className={styles.chatBox}
                             key={room.id}
                             style={{ marginBottom: "10px" }}
                         >
-                            {room.name}
-                            {!room.users.includes(loggedUser.id) ? <Button variant="contained" className={styles.button} onClick={() => handleSusbscribe(room)}>Join</Button> : <p>Joined</p>}
-                        </Box>
+                            <ListItemButton>
+                                <ListItemText primary={room.name} />
+                                {!room.users.includes(loggedUser.id) ? <Button variant="contained" className={styles.button} onClick={() => handleSusbscribe(room)}>Join</Button> : <p>Joined</p>}
+                            </ListItemButton>
+                        </ListItem>
+                    </Box>
                     ))}
-                </Box>
+                </List>
             ) : (
                 <p>No chatrooms available.</p>
             )}
