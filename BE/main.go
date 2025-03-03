@@ -544,27 +544,10 @@ func main() {
 		},
 	})
 
-	//Define Subscription
-	subscriptionType := graphql.NewObject(graphql.ObjectConfig{
-		Name: "Subscription",
-		Fields: graphql.Fields{
-			"messageAdded": &graphql.Field{
-				Type: messageType,
-				Args: graphql.FieldConfigArgument{
-					"chatroomId": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
-				},
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					return nil, nil // This will be handled separately
-				},
-			},
-		},
-	})
-
 	// Define Schema
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query:        queryType,
-		Mutation:     mutation,
-		Subscription: subscriptionType,
+		Query:    queryType,
+		Mutation: mutation,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create schema: %v", err)
