@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import styles from "./createChatroom.module.css";
 import { useEffect, useState } from "react";
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardContent, TextField } from "@mui/material";
 
 const CreateChatroomPage = () => {
     const router = useRouter();
@@ -59,29 +59,37 @@ const CreateChatroomPage = () => {
                 </h1>
                 {loggedUser && (<h1>{loggedUser.Name}</h1>)}
             </Box>
-            <Box
-                sx={{ p: 2, border: '1px solid grey' }}
-            >
-                <form className={styles.loginWrapper} onSubmit={handleSubmit}>
-                    <div className={styles.wrapperLabels}>
-                        <TextField
-                            label="Name"
-                            variant="filled"
-                            type="user"
-                            id="user"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {error && <p style={{ color: "red" }}>{error}</p>}
-                    <div className={styles.buttonWrapper}>
-                        <Button variant="contained" className={styles.button} onClick={handleBack}>back</Button>
-                        <Button variant="contained" className={styles.button} type="submit">Create Room</Button>
-                    </div>
-                </form>
-            </Box>
-        </div>
+            <Card>
+                <CardContent>
+                    <form onSubmit={handleSubmit}>
+                        <Box
+                            sx={{ marginBottom: '1rem' }}
+                        >
+                            <TextField
+                                label="Name"
+                                variant="filled"
+                                type="user"
+                                id="user"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </Box>
+                        {error && <p style={{ color: "red" }}>{error}</p>}
+                        <Box
+                            sx={{ display: "flex", justifyContent: "flex-end" }}
+                        >
+                            <ButtonGroup
+                                variant="contained"
+                            >
+                                <Button onClick={handleBack}>back</Button>
+                                <Button type="submit">Create Room</Button>
+                            </ButtonGroup>
+                        </Box>
+                    </form>
+                </CardContent>
+            </Card>
+        </div >
     )
 };
 
