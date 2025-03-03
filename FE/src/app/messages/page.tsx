@@ -4,7 +4,7 @@ import styles from "./message.module.css";
 import { useChatroom } from "../context/chatSelected";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardContent, TextField } from "@mui/material";
 
 const MessagePage = () => {
     const router = useRouter();
@@ -43,12 +43,14 @@ const MessagePage = () => {
         const response = await results.json();
         if (response.errors) {
             setError("Message doesn't send it")
+        } else {
+            setSendMessage("");
         }
     }
 
     const handleBack = async (e) => {
         e.preventDefault();
-        
+
         router.back();
     };
 
@@ -120,101 +122,118 @@ const MessagePage = () => {
                 </h1>
                 {loggedUser && (<h1>{loggedUser.Name}</h1>)}
             </Box>
-            <Box
-                className={styles.messageWrapper}
-                sx={{ p: 2, border: '1px solid grey', 'marginBottom': '50px !important' }}
+            <Card
+                sx={{ margin: "2rem;", maxHeight: "40rem", overflow: "hidden", display: "flex", flexDirection: "column" }}
             >
-                {messages.map((message) =>
-                    <div
-                        key={message.ID}
-                        className={message?.UserId == loggedUser.id ? styles.mineFather : styles.otherFather}
-                    >
-                        {!message.Reaction?.ReactType ? (
-                            <></>
-                        ) : message.Reaction.ReactType === "like" ? (
-                            <Box
-                                className={styles.countWrapper}
-                            >
-                                <Image
-
-                                    className={styles.logo}
-                                    src="/like.png"
-                                    alt="Like"
-                                    width={20}
-                                    height={20}
-                                />
-                            </Box >
-                        ) : (
-                            <Box
-                                className={styles.countWrapper}
-                            >
-                                <Image
-                                    className={styles.logo}
-                                    src="/dislike.png"
-                                    alt="Dislike"
-                                    width={20}
-                                    height={20}
-                                />
-                            </Box>
-                        )}
-
+                <CardContent
+                    sx={{ flex: 1, overflowY: "auto" }}
+                >
+                    {messages.map((message) =>
                         <Box
-                            className={message?.UserId == loggedUser.id ? styles.mine : styles.other}
+                            key={message.ID}
+                            className={message?.UserId == loggedUser.id ? styles.mineFather : styles.otherFather}
                         >
-                            {message?.UserId != loggedUser.id && (<span>  {message?.User?.Name}:  </span>)}
-                            <span>{message.Description}</span>
-                        </Box>
-                        <>
-                            <Box
-                                className={styles.countWrapper}
-                            >
-                                <Image
-                                    className={styles.logo}
-                                    src="/like.png"
-                                    alt="Like"
-                                    width={20}
-                                    height={20}
-                                    onClick={() => handleLikeDislike(message, "like")}
-                                />
-                                {message?.LikeCount}
-                            </Box>
-                            <Box
-                                className={styles.countWrapper}
-                            >
-                                <Image
-                                    className={styles.logo}
-                                    src="/dislike.png"
-                                    alt="Dislike"
-                                    width={20}
-                                    height={20}
-                                    onClick={() => handleLikeDislike(message, "dislike")}
-                                />
-                                {message?.DislikeCount}
-                            </Box>
-                        </>
-                    </div>
-                )}
+                            {!message.Reaction?.ReactType ? (
+                                <></>
+                            ) : message.Reaction.ReactType === "like" ? (
+                                <Box
+                                    className={styles.countWrapper}
+                                >
+                                    <Image
 
-                <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                    <div className={styles.wrapperLabels}>
-                        <TextField
-                            label="Message"
-                            variant="filled"
-                            fullWidth
-                            type="send"
-                            id="send"
-                            value={sendMessage}
-                            onChange={(e) => setSendMessage(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {error && <p>{error}</p>}
-                    <div className={styles.buttonWrapper}>
-                        <Button variant="contained" className={styles.button} onClick={handleBack}>Back</Button>
-                        <Button variant="contained" className={styles.button} type="submit">Send Message</Button>
-                    </div>
-                </form>
-            </Box>
+                                        className={styles.logo}
+                                        src="/like.png"
+                                        alt="Like"
+                                        width={20}
+                                        height={20}
+                                    />
+                                </Box >
+                            ) : (
+                                <Box
+                                    className={styles.countWrapper}
+                                >
+                                    <Image
+                                        className={styles.logo}
+                                        src="/dislike.png"
+                                        alt="Dislike"
+                                        width={20}
+                                        height={20}
+                                    />
+                                </Box>
+                            )}
+
+                            <Box
+                                className={message?.UserId == loggedUser.id ? styles.mine : styles.other}
+                            >
+                                {message?.UserId != loggedUser.id && (<span>  {message?.User?.Name}:  </span>)}
+                                <span>{message.Description}</span>
+                            </Box>
+                            <>
+                                <Box
+                                    className={styles.countWrapper}
+                                >
+                                    <Image
+                                        className={styles.logo}
+                                        src="/like.png"
+                                        alt="Like"
+                                        width={20}
+                                        height={20}
+                                        onClick={() => handleLikeDislike(message, "like")}
+                                    />
+                                    {message?.LikeCount}
+                                </Box>
+                                <Box
+                                    className={styles.countWrapper}
+                                >
+                                    <Image
+                                        className={styles.logo}
+                                        src="/dislike.png"
+                                        alt="Dislike"
+                                        width={20}
+                                        height={20}
+                                        onClick={() => handleLikeDislike(message, "dislike")}
+                                    />
+                                    {message?.DislikeCount}
+                                </Box>
+                            </>
+                        </Box>
+                    )}
+
+                    <Box
+                        sx={{
+                            position: "sticky",
+                            bottom: 0,
+                            background: "white",
+                            // padding: 1,
+                            borderTop: "1px solid #ddd",
+                        }}
+                    >
+                        <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
+                            <Box className={styles.wrapperLabels}>
+                                <TextField
+                                    label="Message"
+                                    variant="filled"
+                                    fullWidth
+                                    type="send"
+                                    id="send"
+                                    value={sendMessage}
+                                    onChange={(e) => setSendMessage(e.target.value)}
+                                    required
+                                />
+                            </Box>
+                            {error && <p>{error}</p>}
+                            <Box className={styles.buttonWrapper}>
+                                <ButtonGroup
+                                    variant="contained"
+                                >
+                                    <Button onClick={handleBack}>Back</Button>
+                                    <Button type="submit">Send Message</Button>
+                                </ButtonGroup>
+                            </Box>
+                        </form>
+                    </Box>
+                </CardContent>
+            </Card>
         </div>
     )
 }
