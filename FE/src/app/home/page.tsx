@@ -71,7 +71,7 @@ const HomePage = () => {
 
     return (
         <Box
-            sx={{padding: "1rem"}}
+            sx={{ padding: "1rem" }}
         >
             <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
                 <h1>
@@ -85,18 +85,21 @@ const HomePage = () => {
                     component="section"
                     sx={{ p: 2, }}
                 >
-                    {chatrooms.map((room, index) => (<>
-                        {index != 0 && <Divider />}
-                        <ListItem
-                            sx={{ cursor: "pointer" }}
+                    {chatrooms.map((room, index) => (
+                        <Box
                             key={room.id}
-                            onClick={() => handleChatroomClick(room)}
                         >
-                            <ListItemButton>
-                                <ListItemText primary={room.name} />
-                            </ListItemButton>
-                        </ListItem>
-                    </>
+                            {index != 0 && <Divider />}
+                            <ListItem
+                                sx={{ cursor: "pointer" }}
+                                key={room.id}
+                                onClick={() => handleChatroomClick(room)}
+                            >
+                                <ListItemButton>
+                                    <ListItemText primary={room.name} />
+                                </ListItemButton>
+                            </ListItem>
+                        </Box>
                     ))}
                 </List>
             ) : (
