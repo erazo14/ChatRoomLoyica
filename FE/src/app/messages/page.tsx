@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import styles from "./message.module.css";
-import { useChatroom } from "../../context/chatSelected";
+import { useChatroom } from "../context/chatSelected";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Box, Button, TextField } from "@mui/material";

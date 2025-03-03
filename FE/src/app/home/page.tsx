@@ -2,8 +2,8 @@
 import styles from "./home.module.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useChatroom } from "../../context/chatSelected";
-import { Box, Button } from "@mui/material";
+import { useChatroom } from "../context/chatSelected";
+import { Box, Button, ButtonGroup, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 
 const HomePage = () => {
@@ -70,7 +70,9 @@ const HomePage = () => {
     }, [])
 
     return (
-        <div>
+        <Box
+            sx={{padding: "1rem"}}
+        >
             <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
                 <h1>
                     Chat Rooms
@@ -79,37 +81,41 @@ const HomePage = () => {
             </Box>
 
             {chatrooms.length > 0 ? (
-                <Box
+                <List
                     component="section"
                     sx={{ p: 2, }}
                 >
-                    {chatrooms.map(room => (
-                        <Box
-                            sx={{ p: 2, border: '1px solid' }}
-                            className={styles.chatBox}
+                    {chatrooms.map((room, index) => (<>
+                        {index != 0 && <Divider />}
+                        <ListItem
+                            sx={{ cursor: "pointer" }}
                             key={room.id}
                             onClick={() => handleChatroomClick(room)}
-                            style={{ cursor: "pointer"}}
                         >
-                            <h2 className={styles.labelName} >
-                                Nombre del Chat:
-                            </h2>
-                            <h3>
-                                {room.name}
-                            </h3>
-                        </Box>
+                            <ListItemButton>
+                                <ListItemText primary={room.name} />
+                            </ListItemButton>
+                        </ListItem>
+                    </>
                     ))}
-                </Box>
+                </List>
             ) : (
                 <p>No chatrooms available.</p>
-            )}
+            )
+            }
             {error && <p style={{ color: "red" }}>{error}</p>}
-            <div className={styles.buttonWrapper}>
-                <Button variant="contained" className={styles.button} onClick={logOut}>Log Out</Button>
-                <Button variant="contained" className={styles.button} onClick={subscribeRoom}>Join Room</Button>
-                <Button variant="contained" className={styles.button} onClick={createRoom}>Create Room</Button>
-            </div>
-        </div>
+            <Box
+                sx={{ display: "flex", justifyContent: "flex-end" }}
+            >
+                <ButtonGroup
+                    variant="contained"
+                >
+                    <Button onClick={logOut}>Log Out</Button>
+                    <Button onClick={subscribeRoom}>Join Room</Button>
+                    <Button onClick={createRoom}>Create Room</Button>
+                </ButtonGroup>
+            </Box>
+        </Box>
     )
 }
 
