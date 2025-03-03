@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import styles from "./signup.module.css";
 import { useState } from "react";
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardContent, TextField } from "@mui/material";
 
 const SignUpPage = () => {
     const router = useRouter();
@@ -55,53 +55,66 @@ const SignUpPage = () => {
                     Sign Up
                 </h1>
             </Box>
-            <Box
-                className={styles.loginWrapper}
-                sx={{ p: 2, border: '1px solid grey' }}
+            <Card
+                sx={{ p: 2, width: "20rem", display: "flex", justifyContent: "center", alignItems: "center" }}
             >
-                <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                    <div className={styles.wrapperLabels}>
+                <CardContent>
+                    <form onSubmit={handleSubmit}>
+                        <Box
+                            sx={{ marginBottom: '1rem' }}
+                        >
 
-                        <TextField
-                            label="Name"
-                            variant="filled"
-                            type="name"
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className={styles.wrapperLabels}>
+                            <TextField
+                                label="Name"
+                                variant="filled"
+                                type="name"
+                                id="name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </Box>
+                        <Box
+                            sx={{ marginBottom: '1rem' }}
+                        >
 
-                        <TextField
-                            label="User"
-                            variant="filled"
-                            type="user"
-                            id="user"
-                            value={user}
-                            onChange={(e) => setUser(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className={styles.wrapperLabels}>
-                        <TextField
-                            label="Password"
-                            variant="filled"
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {error && <p>{error}</p>}
-                    <div className={styles.buttonWrapper}>
-                        <Button variant="contained" className={styles.button} onClick={handleBack}>back</Button>
-                        <Button variant="contained" className={styles.button} type="submit">sign Up</Button>
-                    </div>
-                </form>
-            </Box>
+                            <TextField
+                                label="User"
+                                variant="filled"
+                                type="user"
+                                id="user"
+                                value={user}
+                                onChange={(e) => setUser(e.target.value)}
+                                required
+                            />
+                        </Box>
+                        <Box
+                            sx={{ marginBottom: '1rem' }}
+                        >
+                            <TextField
+                                label="Password"
+                                variant="filled"
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </Box>
+                        {error && <p>{error}</p>}
+                        <Box
+                            sx={{ display: "flex", justifyContent: "flex-end" }}
+                        >
+                            <ButtonGroup
+                                variant="contained"
+                            >
+                                <Button onClick={handleBack}>back</Button>
+                                <Button type="submit">sign Up</Button>
+                            </ButtonGroup>
+                        </Box>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     )
 };
