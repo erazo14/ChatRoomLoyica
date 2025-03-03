@@ -63,7 +63,6 @@ const SignUpPage = () => {
                         <Box
                             sx={{ marginBottom: '1rem' }}
                         >
-
                             <TextField
                                 label="Name"
                                 variant="filled"

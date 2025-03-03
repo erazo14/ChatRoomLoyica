@@ -60,7 +60,7 @@ const LoginPage = () => {
                 sx={{ p: 2, width: "20rem", display: "flex", justifyContent: "center", alignItems: "center" }}
             >
                 <CardContent>
-                    <form  onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit}>
                         <Box
                             sx={{ marginBottom: '1rem' }}
                         >
