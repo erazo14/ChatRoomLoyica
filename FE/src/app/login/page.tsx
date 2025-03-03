@@ -56,9 +56,7 @@ const LoginPage = () => {
                     Login
                 </h1>
             </Box>
-            <Card
-            // sx={{ p: 2, border: '1px solid grey' }}
-            >
+            <Card>
                 <CardContent>
                     <form  onSubmit={handleSubmit}>
                         <Box
