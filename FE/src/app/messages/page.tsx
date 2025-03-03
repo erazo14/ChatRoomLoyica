@@ -115,7 +115,7 @@ const MessagePage = () => {
     }, [ws]);
 
     return (
-        <div>
+        <Box>
             <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
                 <h1>
                     Chat Room: {name}
@@ -198,43 +198,42 @@ const MessagePage = () => {
                             </>
                         </Box>
                     )}
-
-                    <Box
-                        sx={{
-                            position: "sticky",
-                            bottom: 0,
-                            background: "white",
-                            // padding: 1,
-                            borderTop: "1px solid #ddd",
-                        }}
-                    >
-                        <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                            <Box className={styles.wrapperLabels}>
-                                <TextField
-                                    label="Message"
-                                    variant="filled"
-                                    fullWidth
-                                    type="send"
-                                    id="send"
-                                    value={sendMessage}
-                                    onChange={(e) => setSendMessage(e.target.value)}
-                                    required
-                                />
-                            </Box>
-                            {error && <p>{error}</p>}
-                            <Box className={styles.buttonWrapper}>
-                                <ButtonGroup
-                                    variant="contained"
-                                >
-                                    <Button onClick={handleBack}>Back</Button>
-                                    <Button type="submit">Send Message</Button>
-                                </ButtonGroup>
-                            </Box>
-                        </form>
-                    </Box>
                 </CardContent>
             </Card>
-        </div>
+            <Box
+                sx={{
+                    position: "sticky",
+                    bottom: 0,
+                    background: "white",
+                    padding: 1,
+                    borderTop: "1px solid #ddd",
+                }}
+            >
+                <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
+                    <Box className={styles.wrapperLabels}>
+                        <TextField
+                            label="Message"
+                            variant="filled"
+                            fullWidth
+                            type="send"
+                            id="send"
+                            value={sendMessage}
+                            onChange={(e) => setSendMessage(e.target.value)}
+                            required
+                        />
+                    </Box>
+                    {error && <p>{error}</p>}
+                    <Box className={styles.buttonWrapper}>
+                        <ButtonGroup
+                            variant="contained"
+                        >
+                            <Button onClick={handleBack}>Back</Button>
+                            <Button type="submit">Send Message</Button>
+                        </ButtonGroup>
+                    </Box>
+                </form>
+            </Box>
+        </Box>
     )
 }
 

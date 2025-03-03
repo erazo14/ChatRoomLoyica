@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import styles from "./subscribeChatroom.module.css"
 import { useRouter } from "next/navigation";
-import { Box, Button, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { Box, Button, Card, CardContent, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 const SubscribeChatroomPage = () => {
     const router = useRouter();
@@ -64,7 +64,7 @@ const SubscribeChatroomPage = () => {
     }, []);
 
     return (
-        <div>
+        <Box>
             <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
                 <h1>
                     Joining Rooms
@@ -72,36 +72,55 @@ const SubscribeChatroomPage = () => {
                 {loggedUser && (<h1>{loggedUser.Name}</h1>)}
             </Box>
 
-            {chatrooms.length > 0 ? (
-                <List
-                    component="section"
-                    sx={{ p: 2, }}
+            <Card
+                sx={{ margin: "2rem;", maxHeight: "40rem", overflow: "hidden", display: "flex", flexDirection: "column" }}
+            >
+                <CardContent
+                    sx={{ flex: 1, overflowY: "auto" }}
                 >
-                    {chatrooms.map((room, index) => (<Box
-                        key={room.id}
-                    >
-                        {index != 0 && <Divider />}
-                        <ListItem
-                            className={styles.chatBox}
-                            key={room.id}
-                            style={{ marginBottom: "10px" }}
+                    {chatrooms.length > 0 ? (
+                        <List
+                            component="section"
+                            sx={{ p: 2, }}
                         >
-                            <ListItemButton>
-                                <ListItemText primary={room.name} />
-                                {!room.users.includes(loggedUser.id) ? <Button variant="contained" className={styles.button} onClick={() => handleSusbscribe(room)}>Join</Button> : <p>Joined</p>}
-                            </ListItemButton>
-                        </ListItem>
-                    </Box>
-                    ))}
-                </List>
-            ) : (
-                <p>No chatrooms available.</p>
-            )}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <div className={styles.buttonWrapper}>
-                <Button variant="contained" className={styles.button} onClick={handleBack}>back</Button>
-            </div>
-        </div>
+                            {chatrooms.map((room, index) => (<Box
+                                key={room.id}
+                            >
+                                {index != 0 && <Divider />}
+                                <ListItem
+                                    className={styles.chatBox}
+                                    key={room.id}
+                                    style={{ marginBottom: "10px" }}
+                                >
+                                    <ListItemButton>
+                                        <ListItemText primary={room.name} />
+                                        {!room.users.includes(loggedUser.id) ?
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => handleSusbscribe(room)}
+                                            >
+                                                Join
+                                            </Button> : <p>Joined</p>}
+                                    </ListItemButton>
+                                </ListItem>
+                            </Box>
+                            ))}
+                        </List>
+                    ) : (
+                        <p>No chatrooms available.</p>
+                    )}
+                    {error && <p style={{ color: "red" }}>{error}</p>}
+                </CardContent>
+            </Card>
+            <Box className={styles.buttonWrapper}>
+                <Button
+                    variant="contained"
+                    onClick={handleBack}
+                >
+                    back
+                </Button>
+            </Box>
+        </Box>
     );
 };
 

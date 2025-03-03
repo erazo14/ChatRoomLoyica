@@ -49,7 +49,7 @@ const SignUpPage = () => {
     };
 
     return (
-        <div className={styles.loginWrapper}>
+        <Box className={styles.loginWrapper}>
             <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
                 <h1>
                     Sign Up
@@ -115,7 +115,7 @@ const SignUpPage = () => {
                     </form>
                 </CardContent>
             </Card>
-        </div>
+        </Box>
     )
 };
 

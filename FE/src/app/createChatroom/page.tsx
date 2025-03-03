@@ -59,7 +59,9 @@ const CreateChatroomPage = () => {
                 </h1>
                 {loggedUser && (<h1>{loggedUser.Name}</h1>)}
             </Box>
-            <Card>
+            <Card
+                sx={{ p: 2, width: "20rem", display: "flex", justifyContent: "center", alignItems: "center" }}
+            >
                 <CardContent>
                     <form onSubmit={handleSubmit}>
                         <Box

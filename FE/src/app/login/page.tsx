@@ -50,13 +50,15 @@ const LoginPage = () => {
     };
 
     return (
-        <div className={styles.loginWrapper}>
+        <Box className={styles.loginWrapper}>
             <Box className={styles.WrapperHeader} component="section" sx={{ p: 2, }}>
                 <h1>
                     Login
                 </h1>
             </Box>
-            <Card>
+            <Card
+                sx={{ p: 2, width: "20rem", display: "flex", justifyContent: "center", alignItems: "center" }}
+            >
                 <CardContent>
                     <form  onSubmit={handleSubmit}>
                         <Box
@@ -99,7 +101,7 @@ const LoginPage = () => {
                     </form>
                 </CardContent>
             </Card>
-        </div>
+        </Box>
     )
 }
 

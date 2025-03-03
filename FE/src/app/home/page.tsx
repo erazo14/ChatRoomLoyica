@@ -3,7 +3,7 @@ import styles from "./home.module.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useChatroom } from "../context/chatSelected";
-import { Box, Button, ButtonGroup, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardContent, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 
 const HomePage = () => {
@@ -79,34 +79,41 @@ const HomePage = () => {
                 </h1>
                 {loggedUser && (<h1>{loggedUser.Name}</h1>)}
             </Box>
-
-            {chatrooms.length > 0 ? (
-                <List
-                    component="section"
-                    sx={{ p: 2, }}
+            <Card
+                sx={{ margin: "2rem;", maxHeight: "40rem", overflow: "hidden", display: "flex", flexDirection: "column" }}
+            >
+                <CardContent
+                    sx={{ flex: 1, overflowY: "auto" }}
                 >
-                    {chatrooms.map((room, index) => (
-                        <Box
-                            key={room.id}
+                    {chatrooms.length > 0 ? (
+                        <List
+                            component="section"
+                            sx={{ p: 2, }}
                         >
-                            {index != 0 && <Divider />}
-                            <ListItem
-                                sx={{ cursor: "pointer" }}
-                                key={room.id}
-                                onClick={() => handleChatroomClick(room)}
-                            >
-                                <ListItemButton>
-                                    <ListItemText primary={room.name} />
-                                </ListItemButton>
-                            </ListItem>
-                        </Box>
-                    ))}
-                </List>
-            ) : (
-                <p>No chatrooms available.</p>
-            )
-            }
-            {error && <p style={{ color: "red" }}>{error}</p>}
+                            {chatrooms.map((room, index) => (
+                                <Box
+                                    key={room.id}
+                                >
+                                    {index != 0 && <Divider />}
+                                    <ListItem
+                                        sx={{ cursor: "pointer" }}
+                                        key={room.id}
+                                        onClick={() => handleChatroomClick(room)}
+                                    >
+                                        <ListItemButton>
+                                            <ListItemText primary={room.name} />
+                                        </ListItemButton>
+                                    </ListItem>
+                                </Box>
+                            ))}
+                        </List>
+                    ) : (
+                        <p>No chatrooms available.</p>
+                    )
+                    }
+                    {error && <p style={{ color: "red" }}>{error}</p>}
+                </CardContent>
+            </Card>
             <Box
                 sx={{ display: "flex", justifyContent: "flex-end" }}
             >
