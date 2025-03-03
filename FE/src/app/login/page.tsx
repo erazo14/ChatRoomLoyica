@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
 import { useState } from 'react';
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, ButtonGroup, Card, CardContent, TextField } from "@mui/material";
 
 
 const LoginPage = () => {
@@ -56,39 +56,51 @@ const LoginPage = () => {
                     Login
                 </h1>
             </Box>
-            <Box
-                sx={{ p: 2, border: '1px solid grey' }}
+            <Card
+            // sx={{ p: 2, border: '1px solid grey' }}
             >
-                <form className={styles.wrapperLogin} onSubmit={handleSubmit}>
-                    <div className={styles.wrapperLabels}>
-                        <TextField
-                            label="User"
-                            type="text"
-                            variant="filled"
-                            id="user"
-                            value={user}
-                            onChange={(e) => setUser(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className={styles.wrapperLabels}>
-                        <TextField
-                            label="Password"
-                            variant="filled"
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    {error && <p style={{ color: "red" }}>{error}</p>}
-                    <div className={styles.buttonWrapper}>
-                        <Button variant="contained" className={styles.button} onClick={handleSignUp}>Sign Up</Button>
-                        <Button variant="contained" className={styles.button} type="submit">Login</Button>
-                    </div>
-                </form>
-            </Box>
+                <CardContent>
+                    <form  onSubmit={handleSubmit}>
+                        <Box
+                            sx={{ marginBottom: '1rem' }}
+                        >
+                            <TextField
+                                label="User"
+                                type="text"
+                                variant="filled"
+                                id="user"
+                                value={user}
+                                onChange={(e) => setUser(e.target.value)}
+                                required
+                            />
+                        </Box>
+                        <Box
+                            sx={{ marginBottom: '1rem' }}
+                        >
+                            <TextField
+                                label="Password"
+                                variant="filled"
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </Box>
+                        {error && <p style={{ color: "red" }}>{error}</p>}
+                        <Box
+                            sx={{ display: "flex", justifyContent: "flex-end" }}
+                        >
+                            <ButtonGroup
+                                variant="contained"
+                            >
+                                <Button onClick={handleSignUp}>Sign Up</Button>
+                                <Button type="submit">Login</Button>
+                            </ButtonGroup>
+                        </Box>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     )
 }
