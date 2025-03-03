@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const ChatroomContext = createContext(null);
 
@@ -9,6 +9,10 @@ export const ChatroomProvider = ({ children }) => {
     const [ws, setWs] = useState<WebSocket>();
 
     const setChatroomId = (chatroomId) => {
+        if (ws) {
+            ws.close();
+            setWs(undefined);
+        }
         setId(chatroomId);
         setWs(new WebSocket(`${process.env.NEXT_PUBLIC_URL_WS}?chatroomID=${chatroomId}`));
     };

@@ -48,7 +48,7 @@ const MessagePage = () => {
 
     const handleBack = async (e) => {
         e.preventDefault();
-        ws.close();
+        
         router.back();
     };
 
